@@ -26,7 +26,6 @@ export default function HomePage() {
         setBannerLoading(false);
       })
       .catch((err) => {
-        // console.log(err);
         setBannerData([]);
         setBannerLoading(false);
       });
@@ -60,7 +59,6 @@ export default function HomePage() {
           setGlobalLoading(false);
         })
         .catch((err) => {
-          console.log(err);
           setGlobalData([]);
           setGlobalLoading(false);
         });
@@ -78,7 +76,6 @@ export default function HomePage() {
           setPopularLoading(false);
         })
         .catch((err) => {
-          console.log("most popular", err);
           setPopularData([]);
           setPopularLoading(false);
         });

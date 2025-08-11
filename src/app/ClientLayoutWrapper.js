@@ -7,19 +7,18 @@ import { Toaster } from "sonner";
 
 export default function ClientLayoutWrapper({ children }) {
   const dispatch = useDispatch();
-  const { videoId, showPlayer, title, artist } = useSelector(
+  const { videoId, showPlayer, title, artist , mode , description } = useSelector(
     (state) => state.musicPlayer
   );
 
   const handleSetShowPlayer = (value) => {
     dispatch(setShowPlayer(value));
   };
-  console.log(videoId  , title , artist , showPlayer);
   
   return (
     <>
       <Header />
-      <Toaster />
+      <Toaster richColors theme="dark" closeButton />
       {children}
       {
         <MusicPlayer
@@ -28,6 +27,8 @@ export default function ClientLayoutWrapper({ children }) {
           artist={artist}
           open={showPlayer}
           setOpen={handleSetShowPlayer}
+          mode={mode}
+          description={description}
         />
       }
     </>

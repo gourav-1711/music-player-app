@@ -22,7 +22,6 @@ export async function GET() {
       })
     );
 
-    console.log("playlists", results);
     
     return NextResponse.json(results);
   } catch (err) {

@@ -7,7 +7,6 @@ import {
   setShowPlayer,
   resetPlayer,
 } from "../store/features/musicPlayerSlice";
-import { StatefulButton } from "@/components/ui/stateful-button";
 import { addFavorite, removeFavorite } from "../store/features/favoriteSlice";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -31,14 +30,18 @@ export const PlaylistCard = ({ item, mode }) => {
           id: item.id.videoId,
           title: shortTitle,
           artist: item.snippet.channelTitle,
+          description: item.snippet.description,
+          mode: mode,
         })
       );
     } else {
       dispatch(
         play({
-          id: item.snippet.resourceId.videoId,
+          id: item.snippet.resourceId?.videoId || item.id,
           title: shortTitle,
           artist: item.snippet.channelTitle,
+          description: item.snippet.description,
+          mode: mode,
         })
       );
     }
@@ -75,32 +78,41 @@ export const PlaylistCard = ({ item, mode }) => {
   );
 };
 
-export function StatefulButtonDemo({ item , mode }) {
+export function StatefulButtonDemo({ item, mode }) {
   const dispatch = useDispatch();
-  const [added , setAdded] = useState(false);
+  const [added, setAdded] = useState(false);
 
-  const musicObj = {}
+  const musicObj = {};
 
-  if(mode === "search") {
+  if (mode === "search") {
     musicObj.id = item.id.videoId;
     musicObj.title = item.snippet.title;
     musicObj.artist = item.snippet.channelTitle;
     musicObj.description = item.snippet.description;
-    musicObj.src = item.snippet.thumbnails.high?.url || item.snippet.thumbnails.standard?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url;
+    musicObj.src =
+      item.snippet.thumbnails.high?.url ||
+      item.snippet.thumbnails.standard?.url ||
+      item.snippet.thumbnails.medium?.url ||
+      item.snippet.thumbnails.default?.url;
   } else {
-    musicObj.id = item.snippet.resourceId.videoId;
+    musicObj.id = item.snippet.resourceId?.videoId || item.id;
     musicObj.title = item.snippet.title;
     musicObj.artist = item.snippet.channelTitle;
     musicObj.description = item.snippet.description;
-    musicObj.src = item.snippet.thumbnails.high?.url || item.snippet.thumbnails.standard?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url;
+    musicObj.src =
+      item.snippet.thumbnails.high?.url ||
+      item.snippet.thumbnails.standard?.url ||
+      item.snippet.thumbnails.medium?.url ||
+      item.snippet.thumbnails.default?.url;
   }
-  
-  const favorite = useSelector((state) => state.favorite.favorite);
 
+  const favorite = useSelector((state) => state.favorite.favorite);
 
   useEffect(() => {
     if (favorite.some((fav) => fav.id === musicObj.id)) {
       setAdded(true);
+    } else {
+      setAdded(false);
     }
   }, [favorite]);
   // dummy API call
@@ -117,7 +129,9 @@ export function StatefulButtonDemo({ item , mode }) {
     <div className="flex h-10 w-full items-center    ">
       <Button
         onClick={handleClick}
-        className={` w-full bg-gray-800 hover:bg-gray-700 hover:text-white text-white hover:ring-purple-500 hover:ring-1 ${added ? "bg-purple-500" : "bg-gray-800"}`}
+        className={` w-full bg-gray-800 hover:bg-gray-700 hover:text-white text-white hover:ring-purple-500 hover:ring-1 ${
+          added ? "bg-purple-500" : "bg-gray-800"
+        }`}
         text="Add to Favorite"
       >
         {added ? "Remove from Favorite" : "Add to Favorite"}

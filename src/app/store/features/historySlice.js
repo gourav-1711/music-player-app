@@ -10,20 +10,20 @@ export const historySlice = createSlice({
   reducers: {
     addHistory: (state, action) => {
       const isHistory = state.history.find(
-        (item) => item.id === action.payload.id
+        (item) => item.videoId === action.payload.videoId
       );
       if (!isHistory) {
         state.history.unshift(action.payload);
       } else {
         state.history = state.history.filter(
-          (item) => item.id !== action.payload.id
+          (item) => item.videoId !== action.payload.videoId
         );
         state.history.unshift(action.payload);
       } 
     },
     removeHistory: (state, action) => {
       state.history = state.history.filter(
-        (item) => item.id !== action.payload.id
+        (item) => item.videoId !== action.payload.videoId
       );
     },
   },

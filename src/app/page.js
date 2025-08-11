@@ -13,7 +13,6 @@ import { motion, AnimatePresence } from "motion/react";
 export default function Home() {
   const dispatch = useDispatch();
   const { currentPage } = useSelector((state) => state.navigation);
-  console.log(currentPage);
 
   const handleNavigateToPage = (page) => {
     dispatch(navigateToPage(page));

@@ -36,7 +36,7 @@ export const Header = () => {
         <a
           href="#explore"
           onClick={() => {
-            handleNavigateToPage(PAGES.EXPLORE), console.log("Explore");
+            handleNavigateToPage(PAGES.EXPLORE);
           }}
           className="hover:text-purple-400 transition"
         >

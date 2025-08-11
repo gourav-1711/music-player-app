@@ -15,24 +15,17 @@ export default function Explore() {
 
   useEffect(() => {
     setLoading(true);
-    let isMounted = true;
-
     axios
       .get(apiUrl)
       .then((res) => {
         setData(res.data);
         setLoading(false);
-        // console.log("search data", res.data);
       })
       .catch((err) => {
         toast.error("Something went wrong");
         setLoading(false);
         setData([]);
       });
-
-    return () => {
-      isMounted = false;
-    };
   }, [apiUrl]);
 
   useEffect(() => {
@@ -71,7 +64,7 @@ export default function Explore() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {data.length > 0 && data.map((item , index) => (
-              <PlaylistCard  item={item} key={index} mode={"search"} />
+              <PlaylistCard  item={item} key={index} mode={search.length > 0 ? "search" : ""} />
             ))}
           </div>
         )}

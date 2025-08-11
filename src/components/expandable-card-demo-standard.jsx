@@ -36,7 +36,6 @@ export default function ExpandableCardDemo() {
 
   const dispatch = useDispatch();
 
-  console.log(cards);
 
   const handleCardClick = (item) => {
     dispatch(resetPlayer());

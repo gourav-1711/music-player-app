@@ -5,6 +5,8 @@ const initialState = {
   artist: "",
   title: "",
   showPlayer: false,
+  description : "",
+  mode : ""
 };
 
 export const musicPlayerSlice = createSlice({
@@ -17,6 +19,8 @@ export const musicPlayerSlice = createSlice({
       state.title = title;
       state.artist = artist;
       state.showPlayer = true;
+      state.description = action.payload.description || "";
+      state.mode = action.payload.mode || "";
     },
     setShowPlayer: (state, action) => {
       state.showPlayer = action.payload;
@@ -26,6 +30,7 @@ export const musicPlayerSlice = createSlice({
       state.artist = "";
       state.title = "";
       state.showPlayer = false;
+      state.mode = "";
     },
   },
 });

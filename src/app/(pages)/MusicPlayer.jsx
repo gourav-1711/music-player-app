@@ -16,15 +16,28 @@ import {
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
+import { useDispatch, useSelector } from "react-redux";
+import { play } from "../store/features/musicPlayerSlice";
+import { addFavorite, removeFavorite } from "../store/features/favoriteSlice";
+import { toast } from "sonner";
+import { addHistory } from "../store/features/historySlice";
 
-const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
+const MusicPlayer = ({
+  videoId,
+  title,
+  artist,
+  open,
+  setOpen,
+  mode,
+  description,
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isShuffleOn, setIsShuffleOn] = useState(false);
   const [isRepeatOn, setIsRepeatOn] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [player, setPlayer] = useState(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -98,10 +111,75 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
   const formatTime = (s) =>
     `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
+  // liked feauture
+  const dispatch = useDispatch();
+  const [added, setAdded] = useState(false);
+
+  const favorite = useSelector((state) => state.favorite.favorite);
+
+  const musicObj = {};
+
+  const handleLikeClick = () => {
+    if (mode === "search") {
+      musicObj.id = videoId;
+      musicObj.title = title;
+      musicObj.artist = artist;
+      musicObj.description = description;
+      musicObj.src =
+        `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` ||
+        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    } else {
+      musicObj.id = videoId;
+      musicObj.title = title;
+      musicObj.artist = artist;
+      musicObj.description = description;
+      musicObj.src =
+        `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` ||
+        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    }
+
+    if (added) {
+      dispatch(removeFavorite(musicObj));
+      toast.success("Removed from favorite");
+    } else {
+      dispatch(addFavorite(musicObj));
+      toast.success("Added to favorite");
+    }
+  };
+
+  useEffect(() => {
+    if (favorite.some((fav) => fav.id === videoId)) {
+      setAdded(true);
+    } else {
+      setAdded(false);
+    }
+  }, [favorite, videoId]);
+
+  // history feauture
+  useEffect(() => {
+    if (videoId) {
+      dispatch(
+        addHistory({
+          videoId,
+          title,
+          artist,
+          mode,
+          description,
+          src:
+            `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` ||
+            `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+        })
+      );
+    }
+  }, [videoId]);
+
+  const history = useSelector((state) => state.history.history);
+
+  
 
   return (
     <>
-     {open  && ( <div id={`youtube-player`} style={{ display: "none" }} />)}
+      {open && <div id={`youtube-player`} style={{ display: "none" }} />}
       {open && (
         <div
           className={`fixed bottom-0 left-0 right-0 z-[99999] transition-all duration-300 ${
@@ -113,11 +191,13 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
             {!isExpanded && (
               <div className="flex items-center space-x-4">
                 <img
-                  src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+                  src={
+                    `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` ||
+                    `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                  }
                   alt="thumb"
                   className="w-12 h-12 rounded object-cover"
                   onClick={() => setIsExpanded((prev) => !prev)}
-                 
                 />
                 <div
                   className="flex-1 truncate cursor-pointer"
@@ -140,6 +220,19 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
                   ) : (
                     <Play className="h-5 w-5 ml-0.5" />
                   )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLikeClick}
+                  className={added ? "text-red-400" : ""}
+                >
+                  <Heart
+                    className={`h-4 w-4 ${
+                      added ? "fill-current scale-110" : ""
+                    }`}
+                  />
+                  <span>Like</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -231,12 +324,12 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setIsLiked(!isLiked)}
-                    className={isLiked ? "text-red-400" : ""}
+                    onClick={handleLikeClick}
+                    className={added ? "text-red-400" : ""}
                   >
                     <Heart
                       className={`h-4 w-4 ${
-                        isLiked ? "fill-current scale-110" : ""
+                        added ? "fill-current scale-110" : ""
                       }`}
                     />
                     <span>Like</span>
