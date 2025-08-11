@@ -24,7 +24,7 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isShuffleOn, setIsShuffleOn] = useState(false);
   const [isRepeatOn, setIsRepeatOn] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [player, setPlayer] = useState(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -105,7 +105,7 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
       {open && (
         <div
           className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ${
-            isExpanded ? "h-[100vh]" : "h-[80px]"
+            isExpanded ? " h-svh" : "h-[80px]"
           }`}
         >
           <Card className="w-full h-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-700/40 shadow-2xl p-4 flex flex-col">
@@ -113,10 +113,11 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
             {!isExpanded && (
               <div className="flex items-center space-x-4">
                 <img
-                  src={`https://img.youtube.com/vi/${videoId}/default.jpg`}
+                  src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
                   alt="thumb"
                   className="w-12 h-12 rounded object-cover"
                   onClick={() => setIsExpanded((prev) => !prev)}
+                 
                 />
                 <div
                   className="flex-1 truncate cursor-pointer"
@@ -240,7 +241,7 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
                     />
                     <span>Like</span>
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsShuffleOn(!isShuffleOn)}
@@ -248,7 +249,7 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
                   >
                     <Shuffle className="h-4 w-4" />
                     <span>Shuffle</span>
-                  </Button>
+                  </Button> */}
                   <Button
                     variant="ghost"
                     size="sm"

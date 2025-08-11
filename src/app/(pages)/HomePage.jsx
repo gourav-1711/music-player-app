@@ -5,6 +5,9 @@ import axios from "axios";
 import Banner from "../comman/Banner";
 
 export default function HomePage() {
+  const [bannerData, setBannerData] = useState([]);
+  const [bannerLoading, setBannerLoading] = useState(false);
+
   const [trendingData, setTrendingData] = useState([]);
   const [trendingLoading, setTrendingLoading] = useState(false);
 
@@ -14,7 +17,20 @@ export default function HomePage() {
   const [popularData, setPopularData] = useState([]);
   const [popularLoading, setPopularLoading] = useState(false);
 
-
+  useEffect(() => {
+    setBannerLoading(true);
+    axios
+      .get("/api/banner")
+      .then((res) => {
+        setBannerData(res.data.items);
+        setBannerLoading(false);
+      })
+      .catch((err) => {
+        // console.log(err);
+        setBannerData([]);
+        setBannerLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     const trending = () => {
@@ -36,7 +52,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const global = () => {
-      setTrendingLoading(true);
+      setGlobalLoading(true);
       axios
         .get("/api/global")
         .then((res) => {
@@ -53,30 +69,28 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    const global = () => {
-      setTrendingLoading(true);
+    const popular = () => {
+      setPopularLoading(true);
       axios
         .get("/api/most-popular")
         .then((res) => {
           setPopularData(res.data);
-          console.log(res.data);
-          
           setPopularLoading(false);
         })
         .catch((err) => {
-          console.log( "most popular" ,  err);
+          console.log("most popular", err);
           setPopularData([]);
           setPopularLoading(false);
         });
     };
-    global();
+    popular();
   }, []);
-
-
 
   return (
     <>
-      <Banner />
+      <Banner data={bannerData} loading={bannerLoading} />
+
+
       <CardSlider
         dataObject={trendingData}
         loading={trendingLoading}
@@ -89,12 +103,11 @@ export default function HomePage() {
         title={"Global Release"}
       />
 
-       <CardSlider
+      <CardSlider
         dataObject={popularData}
         loading={popularLoading}
         title={"Most Popular"}
       />
-
     </>
   );
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const playlistId = "PL4fGSI1pDJn6t3TXLGiiJdD-sZbrG3tG0"; // Trending Bollywood Songs
+const playlistId = "PL4fGSI1pDJn5RgLW0Sb_zECecWdH_4zOX"; // Trending Bollywood Songs
 
 export async function GET() {
   const unwanted = [

@@ -50,7 +50,7 @@ export default function CardSlider({ dataObject, title, loading }) {
             }}
             pagination={{
               clickable: true,
-              // dynamicBullets: true,
+              dynamicBullets: true,
             }}
             modules={[Pagination]}
             className="mySwiper custom-swiper"
@@ -58,7 +58,7 @@ export default function CardSlider({ dataObject, title, loading }) {
             {dataObject.map((item, index) => {
               return (
                 <SwiperSlide key={item.etag}>
-                  <PlaylistCard item={item} />
+                  <PlaylistCard item={item} mode={title} />
                 </SwiperSlide>
               );
             })}

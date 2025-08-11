@@ -128,29 +128,27 @@ button{
 }
 
 .swiper-pagination-bullet {
-  background: #818181 !important; /* whatever color you want */
-  opacity: 1 !important; /* remove fade if needed */
+  background: #818181 !important; 
+  opacity: 1 !important; 
   transform: scale(1);
   transition: all 0.3s ease-in-out;
 }
 
 .swiper-pagination-bullet-active {
-  background: #ffffff !important; /* active bullet color */
-  transform: scale(1.2) !important;
-  opacity: 1;
+  background: #ffffff !important; 
 }
 .custom-swiper {
-  padding-bottom: 20px !important; /* Space for pagination */
+  padding-bottom: 20px !important;
   position: relative !important;
 }
 
-.custom-swiper .swiper-pagination {
+/* .custom-swiper .swiper-pagination {
   position: absolute !important;
   bottom: 0 !important;
   left: 0 !important;
   width: 100% !important;
   text-align: center !important;
-}
+} */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;

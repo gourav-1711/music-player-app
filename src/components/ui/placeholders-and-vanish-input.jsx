@@ -3,6 +3,9 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useDispatch } from "react-redux";
+import { navigateToPage, PAGES } from "@/app/store/features/navigationSlice";
+import { setSearch } from "@/app/store/features/SearchSlice";
 
 export function PlaceholdersAndVanishInput({
   placeholders,
@@ -149,6 +152,7 @@ export function PlaceholdersAndVanishInput({
     if (e.key === "Enter" && !animating) {
       vanishAndSubmit();
     }
+    dispatch(setSearch(e.target.value));
   };
 
   const vanishAndSubmit = () => {
@@ -161,11 +165,14 @@ export function PlaceholdersAndVanishInput({
       animate(maxX);
     }
   };
-
+const dispatch = useDispatch();
   const handleSubmit = (e) => {
     e.preventDefault();
     vanishAndSubmit();
     onSubmit && onSubmit(e);
+    setValue("");
+    dispatch(setSearch(value));
+    dispatch(navigateToPage(PAGES.EXPLORE));
   };
   return (
     <form
@@ -185,8 +192,10 @@ export function PlaceholdersAndVanishInput({
           if (!animating) {
             setValue(e.target.value);
             onChange && onChange(e);
+            dispatch(setSearch(e.target.value));
           }
         }}
+        name="search"
         onKeyDown={handleKeyDown}
         ref={inputRef}
         value={value}
@@ -196,6 +205,7 @@ export function PlaceholdersAndVanishInput({
           animating && "text-transparent dark:text-transparent"
         )} />
       <button
+        onClick={handleSubmit}
         disabled={!value}
         type="submit"
         className="absolute right-2 top-1/2 z-50 -translate-y-1/2 h-8 w-8 rounded-full disabled:bg-gray-100 bg-black dark:bg-zinc-900 dark:disabled:bg-zinc-800 transition duration-200 flex items-center justify-center">
