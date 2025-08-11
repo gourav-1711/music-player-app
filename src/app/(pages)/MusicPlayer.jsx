@@ -104,7 +104,7 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
      {open  && ( <div id={`youtube-player`} style={{ display: "none" }} />)}
       {open && (
         <div
-          className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ${
+          className={`fixed bottom-0 left-0 right-0 z-[99999] transition-all duration-300 ${
             isExpanded ? " h-svh" : "h-[80px]"
           }`}
         >
@@ -159,7 +159,7 @@ const MusicPlayer = ({ videoId, title, artist, open, setOpen }) => {
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsExpanded((prev) => !prev)}
-                  className="text-slate-400 hover:text-white fixed top-4 right-4 z-50"
+                  className="text-slate-400 hover:text-white fixed top-4 right-4 z-[99999]"
                 >
                   {isExpanded ? (
                     <ChevronDown className="text-3xl" />

@@ -6,58 +6,35 @@ import { motion, useAnimate } from "motion/react";
 export const StatefulButton = ({ className, text, children, ...props }) => {
   const [scope, animate] = useAnimate();
   const [isMounted, setIsMounted] = useState(false);
+
+  // Prevents any hydration flicker on first render
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
   const animateLoading = async () => {
     await animate(
       ".loader",
-      {
-        width: "20px",
-        scale: 1,
-        display: "block",
-      },
-      {
-        duration: 0.2,
-      }
+      { width: "20px", scale: 1, display: "block" },
+      { duration: 0.2 }
     );
   };
 
   const animateSuccess = async () => {
     await animate(
       ".loader",
-      {
-        width: "0px",
-        scale: 0,
-        display: "none",
-      },
-      {
-        duration: 0.2,
-      }
+      { width: "0px", scale: 0, display: "none" },
+      { duration: 0.2 }
     );
     await animate(
       ".check",
-      {
-        width: "20px",
-        scale: 1,
-        display: "block",
-      },
-      {
-        duration: 0.2,
-      }
+      { width: "20px", scale: 1, display: "block" },
+      { duration: 0.2 }
     );
-
     await animate(
       ".check",
-      {
-        width: "0px",
-        scale: 0,
-        display: "none",
-      },
-      {
-        delay: 2,
-        duration: 0.2,
-      }
+      { width: "0px", scale: 0, display: "none" },
+      { delay: 2, duration: 0.2 }
     );
   };
 
@@ -67,6 +44,7 @@ export const StatefulButton = ({ className, text, children, ...props }) => {
     await animateSuccess();
   };
 
+  // Remove mount-time layout animations — only animate on click
   const {
     onClick,
     onDrag,
@@ -79,9 +57,10 @@ export const StatefulButton = ({ className, text, children, ...props }) => {
 
   return (
     <motion.button
-      layout
-      layoutId="button"
       ref={scope}
+      initial={false} // stops first-mount animations
+      layout={false} // stops unwanted layout transitions
+      layoutId="button"
       className={cn(
         "flex min-w-[120px] cursor-pointer items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2 font-medium text-white ring-1 ring-gray-700 transition duration-200 hover:bg-gray-700 hover:ring-1 hover:ring-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500",
         className
@@ -89,7 +68,7 @@ export const StatefulButton = ({ className, text, children, ...props }) => {
       {...buttonProps}
       onClick={handleClick}
     >
-      <motion.div layout className="flex items-center gap-2">
+      <motion.div layout className={`flex items-center  ${isMounted ? "gap-3 " : "gap-2"}`}>
         <Loader />
         <CheckIcon />
         <motion.span layout className="text-sm">
@@ -103,23 +82,10 @@ export const StatefulButton = ({ className, text, children, ...props }) => {
 const Loader = () => {
   return (
     <motion.svg
-      animate={{
-        rotate: [0, 360],
-      }}
-      initial={{
-        scale: 0,
-        width: 0,
-        display: "none",
-      }}
-      style={{
-        scale: 0.5,
-        display: "none",
-      }}
-      transition={{
-        duration: 0.3,
-        repeat: Infinity,
-        ease: "linear",
-      }}
+      animate={{ rotate: [0, 360] }}
+      initial={{ scale: 0, width: 0, display: "none" }}
+      style={{ scale: 0.5, display: "none" }}
+      transition={{ duration: 0.3, repeat: Infinity, ease: "linear" }}
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
@@ -140,15 +106,8 @@ const Loader = () => {
 const CheckIcon = () => {
   return (
     <motion.svg
-      initial={{
-        scale: 0,
-        width: 0,
-        display: "none",
-      }}
-      style={{
-        scale: 0.5,
-        display: "none",
-      }}
+      initial={{ scale: 0, width: 0, display: "none" }}
+      style={{ scale: 0.5, display: "none" }}
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"

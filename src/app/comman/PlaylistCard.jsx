@@ -1,15 +1,16 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   play,
   setShowPlayer,
   resetPlayer,
 } from "../store/features/musicPlayerSlice";
 import { StatefulButton } from "@/components/ui/stateful-button";
-import { addFavorite } from "../store/features/favoriteSlice";
+import { addFavorite, removeFavorite } from "../store/features/favoriteSlice";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export const PlaylistCard = ({ item, mode }) => {
   // const url =
@@ -47,7 +48,7 @@ export const PlaylistCard = ({ item, mode }) => {
     <>
       <Card className="w-full  text-white !p-0 bg-transparent ">
         <CardContent className="!p-0 space-y-2 hover:bg-gray-800/60 rounded-xl hover:cursor-pointer">
-          <div className="aspect-video bg-black rounded-xl overflow-hidden ">
+          <div className="aspect-video bg-black rounded-xl overflow-hidden hover:ring-purple-500 ">
             <img
               onClick={() => handleCardClick(item)}
               src={
@@ -65,7 +66,7 @@ export const PlaylistCard = ({ item, mode }) => {
           >
             {shortTitle}
           </h4>
-          <StatefulButtonDemo item={item} />
+          <StatefulButtonDemo item={item} mode={mode} />
 
           {/* <p className="text-muted-foreground text-sm">{item.snippet.description.slice(0, 50)}</p> */}
         </CardContent>
@@ -74,24 +75,53 @@ export const PlaylistCard = ({ item, mode }) => {
   );
 };
 
-export function StatefulButtonDemo({ item }) {
-  
-  // dummy API call
+export function StatefulButtonDemo({ item , mode }) {
   const dispatch = useDispatch();
+  const [added , setAdded] = useState(false);
+
+  const musicObj = {}
+
+  if(mode === "search") {
+    musicObj.id = item.id.videoId;
+    musicObj.title = item.snippet.title;
+    musicObj.artist = item.snippet.channelTitle;
+    musicObj.description = item.snippet.description;
+    musicObj.src = item.snippet.thumbnails.high?.url || item.snippet.thumbnails.standard?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url;
+  } else {
+    musicObj.id = item.snippet.resourceId.videoId;
+    musicObj.title = item.snippet.title;
+    musicObj.artist = item.snippet.channelTitle;
+    musicObj.description = item.snippet.description;
+    musicObj.src = item.snippet.thumbnails.high?.url || item.snippet.thumbnails.standard?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url;
+  }
+  
+  const favorite = useSelector((state) => state.favorite.favorite);
+
+
+  useEffect(() => {
+    if (favorite.some((fav) => fav.id === musicObj.id)) {
+      setAdded(true);
+    }
+  }, [favorite]);
+  // dummy API call
   const handleClick = () => {
-    dispatch(addFavorite(item));
-    toast.success("Added to favorite");
-    console.log(item);
+    if (added) {
+      dispatch(removeFavorite(musicObj));
+      toast.success("Removed from favorite");
+    } else {
+      dispatch(addFavorite(musicObj));
+      toast.success("Added to favorite");
+    }
   };
   return (
-    <div className="flex h-10 w-full items-center  px-2 ">
-      <StatefulButton
+    <div className="flex h-10 w-full items-center    ">
+      <Button
         onClick={handleClick}
-        className={` w-full `}
+        className={` w-full bg-gray-800 hover:bg-gray-700 hover:text-white text-white hover:ring-purple-500 hover:ring-1 ${added ? "bg-purple-500" : "bg-gray-800"}`}
         text="Add to Favorite"
       >
-        Add to Favorite
-      </StatefulButton>
+        {added ? "Remove from Favorite" : "Add to Favorite"}
+      </Button>
     </div>
   );
 }

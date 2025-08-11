@@ -69,7 +69,7 @@ export default function Home() {
           exit="out"
           variants={pageVariants}
           transition={pageTransition}
-          className="w-full"
+          className="w-full pb-24"
         >
           {CurrentPageComponent && <CurrentPageComponent />}
         </motion.div>
