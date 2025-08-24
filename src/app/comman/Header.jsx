@@ -22,6 +22,7 @@ export const Header = () => {
     dispatch(navigateToPage(page));
   };
 
+
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-[#0f0c1d] border-b border-[#1c1633]">
       {/* Left: Logo */}
@@ -103,6 +104,8 @@ export function MobileMenu() {
       setOpen(false);
     }
   }, [currentPage]);
+  const {showPlayer} = useSelector((state) => state.musicPlayer);
+
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -113,7 +116,7 @@ export function MobileMenu() {
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className="bg-blue-500 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-0 border  text-white p-6"
+        className={`bg-blue-500 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-0 border  text-white p-6 ${showPlayer ? "h-[calc(100vh-1rem)]" : "h-[calc(100vh-4rem)]"}`}
       >
         <div className="mt-10 border-t border-[#1c1633] pt-6 flex items-center gap-4">
           <Avatar className="cursor-pointer">

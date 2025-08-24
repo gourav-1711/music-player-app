@@ -17,20 +17,27 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { useDispatch, useSelector } from "react-redux";
-import { play } from "../store/features/musicPlayerSlice";
+import { play, setShowPlayer } from "../store/features/musicPlayerSlice";
 import { addFavorite, removeFavorite } from "../store/features/favoriteSlice";
 import { toast } from "sonner";
 import { addHistory } from "../store/features/historySlice";
 
 const MusicPlayer = ({
-  videoId,
-  title,
-  artist,
-  open,
-  setOpen,
-  mode,
-  description,
+  // videoId,
+  // title,
+  // artist,
+  // open,
+  // setOpen,
+  // mode,
+  // description,
 }) => {
+  const { videoId, showPlayer, title, artist, mode, description } = useSelector(
+    (state) => state.musicPlayer
+  );
+
+  const dispatch = useDispatch();
+
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -112,7 +119,6 @@ const MusicPlayer = ({
     `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
   // liked feauture
-  const dispatch = useDispatch();
   const [added, setAdded] = useState(false);
 
   const favorite = useSelector((state) => state.favorite.favorite);
@@ -173,14 +179,12 @@ const MusicPlayer = ({
     }
   }, [videoId]);
 
-  const history = useSelector((state) => state.history.history);
 
-  
 
   return (
     <>
-      {open && <div id={`youtube-player`} style={{ display: "none" }} />}
-      {open && (
+      {showPlayer && <div id={`youtube-player`} style={{ display: "none" }} />}
+      {showPlayer && (
         <div
           className={`fixed bottom-0 left-0 right-0 z-[99999] transition-all duration-300 ${
             isExpanded ? " h-svh" : "h-[80px]"
