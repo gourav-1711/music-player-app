@@ -41,7 +41,6 @@ export default function HomePage() {
           setTrendingLoading(false);
         })
         .catch((err) => {
-          console.log(err);
           setTrendingData([]);
           setTrendingLoading(false);
         });

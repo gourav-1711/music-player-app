@@ -21,22 +21,24 @@ import { play, setShowPlayer } from "../store/features/musicPlayerSlice";
 import { addFavorite, removeFavorite } from "../store/features/favoriteSlice";
 import { toast } from "sonner";
 import { addHistory } from "../store/features/historySlice";
+import { CloseIcon } from "@/components/expandable-card-demo-grid";
 
-const MusicPlayer = ({
-  // videoId,
-  // title,
-  // artist,
-  // open,
-  // setOpen,
-  // mode,
-  // description,
-}) => {
+const MusicPlayer = (
+  {
+    // videoId,
+    // title,
+    // artist,
+    // open,
+    // setOpen,
+    // mode,
+    // description,
+  }
+) => {
   const { videoId, showPlayer, title, artist, mode, description } = useSelector(
     (state) => state.musicPlayer
   );
 
   const dispatch = useDispatch();
-
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -146,10 +148,8 @@ const MusicPlayer = ({
 
     if (added) {
       dispatch(removeFavorite(musicObj));
-      toast.success("Removed from favorite");
     } else {
       dispatch(addFavorite(musicObj));
-      toast.success("Added to favorite");
     }
   };
 
@@ -179,11 +179,9 @@ const MusicPlayer = ({
     }
   }, [videoId]);
 
-
-
   return (
     <>
-      {showPlayer && <div id={`youtube-player`} style={{ display: "none" }} />}
+      <div id={`youtube-player`} style={{ display: "none" }} />
       {showPlayer && (
         <div
           className={`fixed bottom-0 left-0 right-0 z-[99999] transition-all duration-300 ${
@@ -246,12 +244,29 @@ const MusicPlayer = ({
                 >
                   {isExpanded ? <ChevronDown /> : <ChevronUp />}
                 </Button>
+                <Button
+                  onClick={() => {
+                    if (player) player.pauseVideo();
+                    dispatch(setShowPlayer(false));
+                  }}
+                >
+                  <CloseIcon />
+                </Button>
               </div>
             )}
 
             {/* Expanded Content */}
             {isExpanded && (
               <div className="mt-6 space-y-4">
+                <Button
+                  className="fixed top-4 left-4 z-[99999]"
+                  onClick={() => {
+                    if (player) player.pauseVideo();
+                    dispatch(setShowPlayer(false));
+                  }}
+                >
+                  <CloseIcon />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"

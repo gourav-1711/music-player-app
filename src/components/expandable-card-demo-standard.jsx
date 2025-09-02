@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import { useDispatch, useSelector } from "react-redux";
 import { play, resetPlayer } from "@/app/store/features/musicPlayerSlice";
+import { removeFavorite } from "@/app/store/features/favoriteSlice";
+import { Button } from "./ui/button";
 
 export default function ExpandableCardDemo() {
   const [active, setActive] = useState(null);
@@ -119,6 +121,15 @@ export default function ExpandableCardDemo() {
                   >
                     {"Play"}
                   </motion.button>
+                  <Button
+                    className=" rounded-full w-fit  bg-red-500/80  hover:bg-red-600 m-0 text-white"
+                    onClick={() => {
+                      dispatch(removeFavorite(active));
+                      setActive(null);
+                    }}
+                  >
+                    Remove
+                  </Button>
                 </div>
                 <motion.p
                   layoutId={`description-${active.description}-${id}`}
@@ -151,7 +162,7 @@ export default function ExpandableCardDemo() {
               layoutId={`card-${card.title}-${id}`}
               key={`card-${card.title}-${id}`}
               onClick={() => setActive(card)}
-              className="p-4 flex flex-row justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl cursor-pointer"
+              className="p-4 flex flex-row justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl cursor-pointer "
             >
               <div className="flex gap-4 flex-row ">
                 <motion.div layoutId={`image-${card.title}-${id}`}>

@@ -19,15 +19,25 @@ export const historySlice = createSlice({
           (item) => item.videoId !== action.payload.videoId
         );
         state.history.unshift(action.payload);
-      } 
+      }
     },
     removeHistory: (state, action) => {
       state.history = state.history.filter(
         (item) => item.videoId !== action.payload.videoId
       );
     },
+    addFullHistory: (state, action) => {
+      const newItems = action.payload.filter(
+        (item) => !state.history.some((hist) => hist.videoId === item.videoId)
+      );
+      state.history = [...state.history, ...newItems];
+    },
+    clearHistory: (state) => {
+      state.history = [];
+    },
   },
 });
 
-export const { addHistory, removeHistory } = historySlice.actions;
+export const { addHistory, removeHistory, addFullHistory, clearHistory } =
+  historySlice.actions;
 export default historySlice.reducer;

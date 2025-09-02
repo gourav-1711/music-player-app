@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { navigateToPage, PAGES } from "./store/features/navigationSlice";
 import HomePage from "./(pages)/HomePage";
@@ -8,15 +8,15 @@ import Playlist from "./(pages)/Playlist";
 import History from "./(pages)/History";
 import Dashboard from "./(pages)/Dashboard";
 import Favorite from "./(pages)/Favorite";
+import LoginRegister from "./(pages)/LoginRegister";
+import Profile from "./(pages)/Profile";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function Home() {
-  const dispatch = useDispatch();
   const { currentPage } = useSelector((state) => state.navigation);
-
-  const handleNavigateToPage = (page) => {
-    dispatch(navigateToPage(page));
-  };
+  const User = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+ 
 
   // Animation variants for page transitions
   const pageVariants = {
@@ -46,7 +46,6 @@ export default function Home() {
     duration: 0.4,
   };
 
-  // Component mapping for cleaner code
   const pageComponents = {
     [PAGES.HOME]: HomePage,
     [PAGES.EXPLORE]: Explore,
@@ -54,12 +53,22 @@ export default function Home() {
     [PAGES.HISTORY]: History,
     [PAGES.DASHBOARD]: Dashboard,
     [PAGES.FAVORITE]: Favorite,
+    [PAGES.LOGIN_REGISTER]: LoginRegister,
+    [PAGES.PROFILE]: Profile,
   };
 
   const CurrentPageComponent = pageComponents[currentPage];
 
+  useEffect(() => {
+    if(User && currentPage === PAGES.LOGIN_REGISTER){
+      dispatch(navigateToPage(PAGES.HOME));
+    }
+  }, [currentPage, User]);
+
+
+
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden ">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentPage}
@@ -68,7 +77,7 @@ export default function Home() {
           exit="out"
           variants={pageVariants}
           transition={pageTransition}
-          className="w-full pb-24"
+          className="w-full "
         >
           {CurrentPageComponent && <CurrentPageComponent />}
         </motion.div>

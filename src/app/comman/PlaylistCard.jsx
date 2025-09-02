@@ -119,10 +119,8 @@ export function StatefulButtonDemo({ item, mode }) {
   const handleClick = () => {
     if (added) {
       dispatch(removeFavorite(musicObj));
-      toast.success("Removed from favorite");
     } else {
       dispatch(addFavorite(musicObj));
-      toast.success("Added to favorite");
     }
   };
   return (

@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-
 // Page constants
 export const PAGES = {
   HOME: "home",
@@ -8,6 +7,8 @@ export const PAGES = {
   HISTORY: "history",
   DASHBOARD: "dashboard",
   FAVORITE: "favorite",
+  LOGIN_REGISTER: "loginRegister",
+  PROFILE: "profile",
 };
 
 const initialState = {

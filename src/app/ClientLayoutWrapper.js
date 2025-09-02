@@ -1,48 +1,31 @@
 "use client";
-import { useSelector, useDispatch } from "react-redux";
-import { setShowPlayer } from "./store/features/musicPlayerSlice";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "./store/store";
 import { Header } from "./comman/Header";
 import MusicPlayer from "./(pages)/MusicPlayer";
 import { Toaster } from "sonner";
-import { Provider } from "react-redux";
 import { useEffect } from "react";
-import store from "./store/store";
 
 export default function ClientLayoutWrapper({ children }) {
-  // const dispatch = useDispatch();
-  // const { videoId, showPlayer, title, artist , mode , description } = useSelector(
-  //   (state) => state.musicPlayer
-  // );
+  // useEffect(() => {
+  //   console.clear();
+  //   setTimeout(() => {
+  //     console.clear();
+  //   }, 1000);
+  // }, []);
 
-  // const handleSetShowPlayer = (value) => {
-  //   dispatch(setShowPlayer(value));
-  // };
 
-  useEffect(() => {
-    console.clear();
-    setTimeout(() => {
-      console.clear();
-    }, 1000);
-  }, []);
-  
   return (
-    <>
     <Provider store={store}>
-      <Header />
-      <Toaster richColors theme="dark" closeButton />
-      {children}
-      {
-        <MusicPlayer
-          // videoId={videoId}
-          // title={title}
-          // artist={artist}
-          // open={showPlayer}
-          // setOpen={handleSetShowPlayer}
-          // mode={mode}
-          // description={description}
-        />
-      }
+      <PersistGate loading={null} persistor={persistor}>
+        <div className="min-h-screen flex flex-col bg-gray-900">
+          <Header />
+          <main className="flex-1">{children}</main>
+          <MusicPlayer />
+          <Toaster  richColors  closeButton={true} theme="dark"/>
+        </div>
+      </PersistGate>
     </Provider>
-    </>
   );
 }
