@@ -10,6 +10,7 @@ import {
 import { addFavorite, removeFavorite } from "../store/features/favoriteSlice";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Heart } from "lucide-react";
 
 export const PlaylistCard = ({ item, mode }) => {
   // const url =
@@ -115,7 +116,7 @@ export function StatefulButtonDemo({ item, mode }) {
       setAdded(false);
     }
   }, [favorite]);
-  // dummy API call
+
   const handleClick = () => {
     if (added) {
       dispatch(removeFavorite(musicObj));
@@ -127,11 +128,15 @@ export function StatefulButtonDemo({ item, mode }) {
     <div className="flex h-10 w-full items-center    ">
       <Button
         onClick={handleClick}
-        className={` w-full bg-gray-800 hover:bg-gray-700 hover:text-white text-white hover:ring-purple-500 hover:ring-1 ${
-          added ? "bg-purple-500" : "bg-gray-800"
-        }`}
+        className={` w-full bg-gray-800 hover:bg-gray-700 hover:text-white text-white hover:ring-purple-500 hover:ring-1 `}
         text="Add to Favorite"
       >
+        <Heart
+          fill={added ? "#bf37e0" : "transparent"}
+          stroke="white"
+          strokeWidth={added ? 0 : 2}
+          size={20}
+        />
         {added ? "Remove from Favorite" : "Add to Favorite"}
       </Button>
     </div>

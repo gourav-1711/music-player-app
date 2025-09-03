@@ -20,7 +20,7 @@ export default function HomePage() {
   useEffect(() => {
     setBannerLoading(true);
     axios
-      .get("/api/banner")
+      .get("/api/music/banner")
       .then((res) => {
         setBannerData(res.data.items);
         setBannerLoading(false);
@@ -35,7 +35,7 @@ export default function HomePage() {
     const trending = () => {
       setTrendingLoading(true);
       axios
-        .get("/api/trending")
+        .get("/api/music/trending")
         .then((res) => {
           setTrendingData(res.data);
           setTrendingLoading(false);
@@ -52,7 +52,7 @@ export default function HomePage() {
     const global = () => {
       setGlobalLoading(true);
       axios
-        .get("/api/global")
+        .get("/api/music/global")
         .then((res) => {
           setGlobalData(res.data);
           setGlobalLoading(false);
@@ -69,7 +69,7 @@ export default function HomePage() {
     const popular = () => {
       setPopularLoading(true);
       axios
-        .get("/api/most-popular")
+        .get("/api/music/most-popular")
         .then((res) => {
           setPopularData(res.data);
           setPopularLoading(false);

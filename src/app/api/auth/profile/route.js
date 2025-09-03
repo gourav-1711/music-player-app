@@ -20,9 +20,9 @@ export async function POST() {
     } catch (err) {
       return Response.json({ error: "Invalid token" }, { status: 401 });
     }
-
+    
     // fetch user (exclude password)
-    const user = await User.findById(decoded.user._id).select("-password");
+    const user = await User.findById(decoded._id).select("-password");
 
     if (!user) {
       return Response.json({ error: "User not found" }, { status: 404 });

@@ -2,36 +2,42 @@ import { connectDB } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import User from "@/lib/model/user"
+import { NextResponse } from "next/server";
+import User from "@/lib/model/user";
 
 export async function POST(req) {
   try {
     await connectDB();
+
     const { name, email, password } = await req.json();
 
     if (!name || !email || !password) {
-      return Response.json({ error: "All fields are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 }
+      );
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return Response.json({ error: "User already exists" }, { status: 400 });
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 400 }
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashedPassword });
 
-    // 🔑 Create JWT
+    // 🔑 Create JWT with minimal payload
     const token = jwt.sign(
-      { user },
+      { _id: user._id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     // 🍪 Store JWT in cookie
-    cookies().set({
-      name: "user",
-      value: token,
+    cookies().set("user", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
@@ -39,12 +45,18 @@ export async function POST(req) {
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 
-    return Response.json({
+    // Strip password before sending user back
+    const { password: _, ...safeUser } = user.toObject();
+
+    return NextResponse.json({
       message: "User registered successfully",
-      user,
-      token, // optional: also send in JSON if you want
+      user: safeUser,
+      token, // optional
     });
   } catch (err) {
-    return Response.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

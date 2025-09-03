@@ -28,7 +28,7 @@ const Profile = () => {
       .then((res) => {
         setLoading(false);
         setDetails(res.data.user);
-        dispatch(addFullFavorite(res.data.user.favoriteSongs));
+        // dispatch(addFullFavorite(res.data.user.favoriteSongs));
         // dispatch(addFullHistory(res.data.user.history));
       })
       .catch((err) => {

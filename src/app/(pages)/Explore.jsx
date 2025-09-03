@@ -9,7 +9,7 @@ import { PlaylistCard } from "../comman/PlaylistCard";
 export default function Explore() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [apiUrl, setApiUrl] = useState("/api/explore");
+  const [apiUrl, setApiUrl] = useState("/api/music/explore");
 
   const search = useSelector((state) => state.search.search);
 
@@ -31,9 +31,9 @@ export default function Explore() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (search !== "" && search !== null && search !== undefined) {
-        setApiUrl(`/api/search?search=${search}`);
+        setApiUrl(`/api/music/search?search=${search}`);
       } else {
-        setApiUrl("/api/explore");
+        setApiUrl("/api/music/explore");
       }
     }, 1000); // Add debounce to prevent too many requests
 
