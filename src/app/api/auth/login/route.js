@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import User from "@/lib/model/user";
+import user from "@/lib/model/user";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
@@ -18,7 +18,7 @@ export async function POST(req) {
       );
     }
 
-    const user = await User.findOne({ email });
+    const user = await user.findOne({ email });
     if (!user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
@@ -42,7 +42,7 @@ export async function POST(req) {
     );
 
     // 🍪 Store JWT in cookie
-    cookies().set("user", token, {
+    cookies().set("music-user", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",

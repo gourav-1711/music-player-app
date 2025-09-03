@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import User from "@/lib/model/user";
+import user from "@/lib/model/user";
 
 export async function POST(req) {
   try {
@@ -18,7 +18,7 @@ export async function POST(req) {
       );
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await user.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
         { error: "User already exists" },
@@ -27,7 +27,7 @@ export async function POST(req) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await user.create({ name, email, password: hashedPassword });
 
     // 🔑 Create JWT with minimal payload
     const token = jwt.sign(
@@ -37,7 +37,7 @@ export async function POST(req) {
     );
 
     // 🍪 Store JWT in cookie
-    cookies().set("user", token, {
+    cookies().set("music-user", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",

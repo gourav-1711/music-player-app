@@ -1,11 +1,11 @@
 import { connectDB } from "@/lib/db";
-import User from "@/lib/model/user";
+import user from "@/lib/model/user";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
 export async function POST() {
   const cookieStore = await cookies();
-  const token = cookieStore.get("user")?.value;
+  const token = cookieStore.get("music-user")?.value;
 
   try {
     await connectDB();
@@ -22,7 +22,7 @@ export async function POST() {
     }
     
     // fetch user (exclude password)
-    const user = await User.findById(decoded._id).select("-password");
+    const user = await user.findById(decoded._id).select("-password");
 
     if (!user) {
       return Response.json({ error: "User not found" }, { status: 404 });

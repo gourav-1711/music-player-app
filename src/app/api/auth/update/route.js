@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import User from "@/lib/model/user";
+import user from "@/lib/model/user";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
@@ -10,7 +10,7 @@ export async function POST(req) {
     await connectDB();
 
     // 1. Read cookie
-    const token = await cookies().get("user")?.value;
+    const token = await cookies().get("music-user")?.value;
     if (!token) {
       return NextResponse.json({ error: "No token found" }, { status: 401 });
     }
@@ -33,9 +33,9 @@ export async function POST(req) {
 
     // 4. Handle password change
     if (oldPassword && newPassword) {
-      const user = await User.findById(decoded._id);
+      const user = await user.findById(decoded._id);
       if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+        return NextResponse.json({ error: "user not found" }, { status: 404 });
       }
 
       const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
@@ -47,14 +47,14 @@ export async function POST(req) {
     }
 
     // 5. Update user
-    const user = await User.findByIdAndUpdate(
+    const user = await user.findByIdAndUpdate(
       decoded._id,
       { $set: updateData },
       { new: true }
     );
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: "user not found" }, { status: 404 });
     }
 
     // Strip password
@@ -63,7 +63,7 @@ export async function POST(req) {
     return NextResponse.json({
       message: oldPassword && newPassword
         ? "Password changed successfully"
-        : "User updated successfully",
+        : "user updated successfully",
       user: safeUser,
     });
   } catch (err) {
