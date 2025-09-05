@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import user from "../../../../lib/model/user";
+import user from "@/lib/model/user";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
