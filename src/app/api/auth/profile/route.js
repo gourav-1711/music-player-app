@@ -1,5 +1,5 @@
 import { connectDB } from "@/lib/db";
-import user from "@/lib/model/user";
+import user from "../../../../lib/model/user";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
@@ -22,13 +22,13 @@ export async function POST() {
     }
     
     // fetch user (exclude password)
-    const user = await user.findById(decoded._id).select("-password");
+    const userObj = await user.findById(decoded._id).select("-password");
 
-    if (!user) {
+    if (!userObj) {
       return Response.json({ error: "User not found" }, { status: 404 });
     }
 
-    return Response.json({ user });
+    return Response.json({ userObj });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
   }

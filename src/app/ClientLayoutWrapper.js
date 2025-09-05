@@ -5,15 +5,9 @@ import { store, persistor } from "./store/store";
 import { Header } from "./comman/Header";
 import MusicPlayer from "./(pages)/MusicPlayer";
 import { Toaster } from "sonner";
-import { useEffect } from "react";
 
 export default function ClientLayoutWrapper({ children }) {
-  // useEffect(() => {
-  //   console.clear();
-  //   setTimeout(() => {
-  //     console.clear();
-  //   }, 1000);
-  // }, []);
+
 
 
   return (

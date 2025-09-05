@@ -2,14 +2,11 @@
 import { motion } from "motion/react";
 import React, { useEffect, useState } from "react";
 import { ImagesSlider } from "../../components/ui/images-slider";
-import { Button } from "@/components/ui/button";
-import { useDispatch } from "react-redux";
-import { navigateToPage } from "../store/features/navigationSlice";
-import { PAGES } from "../store/features/navigationSlice";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 export default function Banner({ data, loading = true }) {
-  const dispatch = useDispatch();
+  const router = useRouter();
 
   const [images, setImages] = useState([
     "https://images.unsplash.com/photo-1485433592409-9018e83a1f0d?q=80&w=1814&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -17,10 +14,9 @@ export default function Banner({ data, loading = true }) {
     "https://images.unsplash.com/photo-1482189349482-3defd547e0e9?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   ]);
 
-  useEffect( () => {
+  useEffect(() => {
     if (data && data.length > 0) {
       const thumbnails = data.map((item) => {
-        
         return (
           item.snippet.thumbnails.maxres?.url ||
           item.snippet.thumbnails.standard?.url ||
@@ -28,7 +24,7 @@ export default function Banner({ data, loading = true }) {
           item.snippet.thumbnails.medium?.url ||
           item.snippet.thumbnails.default.url
         );
-      })
+      });
       setImages(thumbnails);
     } else {
       const images = [
@@ -39,7 +35,6 @@ export default function Banner({ data, loading = true }) {
       setImages(images);
     }
   }, [data]);
-
 
   return (
     <>
@@ -68,7 +63,7 @@ export default function Banner({ data, loading = true }) {
               Discover new music and artists
             </motion.p>
             <button
-              onClick={() => dispatch(navigateToPage(PAGES.EXPLORE))}
+              onClick={() => router.push("/exlpore")}
               className="px-4 py-2 backdrop-blur-sm border bg-[#7a06b0]/10 border-[#7a06b0]/20 text-white mx-auto text-center rounded-full relative mt-4"
             >
               <span>Explore Songs →</span>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Play,
   Pause,
@@ -12,46 +12,222 @@ import {
   Repeat,
   ChevronDown,
   ChevronUp,
+  DotIcon,
+  MoreHorizontalIcon,
+  VolumeOff,
+  Volume,
+  Volume2Icon,
+  Cross,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { useDispatch, useSelector } from "react-redux";
-import { play, setShowPlayer } from "../store/features/musicPlayerSlice";
+import {
+  play,
+  resetPlayer,
+  setShowPlayer,
+} from "../store/features/musicPlayerSlice";
 import { addFavorite, removeFavorite } from "../store/features/favoriteSlice";
 import { toast } from "sonner";
 import { addHistory } from "../store/features/historySlice";
 import { CloseIcon } from "@/components/expandable-card-demo-grid";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import AlertMessage from "../comman/AlertMessage";
 
-const MusicPlayer = (
-  {
-    // videoId,
-    // title,
-    // artist,
-    // open,
-    // setOpen,
-    // mode,
-    // description,
-  }
-) => {
-  const { videoId, showPlayer, title, artist, mode, description } = useSelector(
-    (state) => state.musicPlayer
-  );
+const MusicPlayer = () => {
+  const { videoId, showPlayer, title, artist, mode, description, src, from } =
+    useSelector((state) => state.musicPlayer);
 
+  const getActiveList = () => {
+    if (from === "history") return history;
+    if (from === "favorite") return favorite;
+    if (from === "playlist") return playlist;
+    return [];
+  };
+
+  const history = useSelector((state) => state.history.history);
+  const favorite = useSelector((state) => state.favorite.favorite);
+  const playlist = useSelector((state) => state.playlist.playlist);
   const dispatch = useDispatch();
+
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isShuffleOn, setIsShuffleOn] = useState(false);
   const [isRepeatOn, setIsRepeatOn] = useState(false);
+  const [isShuffleOn, setIsShuffleOn] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [player, setPlayer] = useState(null);
   const [isReady, setIsReady] = useState(false);
+  const [isAutoplayOn, setIsAutoplayOn] = useState(false);
+  const [mute, setMute] = useState(false);
+
+  // Refs to handle stale closure issues
+  const isRepeatOnRef = useRef(isRepeatOn);
+  const isShuffleOnRef = useRef(isShuffleOn);
+  const isAutoplayOnRef = useRef(isAutoplayOn);
+
+  // Update refs when state changes
+  useEffect(() => {
+    isRepeatOnRef.current = isRepeatOn;
+  }, [isRepeatOn]);
 
   useEffect(() => {
+    isShuffleOnRef.current = isShuffleOn;
+  }, [isShuffleOn]);
+
+  useEffect(() => {
+    isAutoplayOnRef.current = isAutoplayOn;
+  }, [isAutoplayOn]);
+
+  useEffect(() => {
+    if (from === "history" || from === "favorite" || from === "playlist") {
+      // history has videoId
+      if (from === "history") {
+        setCurrentIndex(history.findIndex((item) => item.videoId === videoId));
+        setTotalItems(history.length);
+      }
+      // favorite has Id
+      if (from === "favorite") {
+        setCurrentIndex(favorite.findIndex((item) => item.id === videoId));
+        setTotalItems(favorite.length);
+      }
+      // playlist has id
+      if (from === "playlist") {
+        setCurrentIndex(playlist.findIndex((item) => item.id === videoId));
+        setTotalItems(playlist.length);
+      }
+      // console.log(currentIndex);
+    }
+  }, [from, videoId]);
+
+  const repeatSame = () => {
+    console.log("repeatSame");
+    if (player && typeof player.seekTo === "function") {
+      console.log("player.seekTo");
+      player.seekTo(0, true); // jump back to start
+      player.playVideo(); // force play
+      setIsPlaying(true);
+    } else {
+      console.log("handleSeek");
+      handleSeek(0);
+      setIsPlaying(false);
+      setTimeout(() => {
+        setIsPlaying(true);
+        handleSeek(currentTime - 40);
+      }, 500);
+    }
+  };
+
+  const handlePrevious = () => {
+    const list = getActiveList();
+    const newIndex = currentIndex > 0 ? currentIndex - 1 : totalItems - 1;
+    const prevItem = list[newIndex];
+
+    setCurrentIndex(newIndex);
+    dispatch(resetPlayer());
+    setCurrentTime(0);
+    setIsRepeatOn(false);
+    dispatch(
+      play({
+        id: prevItem.videoId || prevItem.id,
+        title: prevItem.title,
+        artist: prevItem.artist,
+        description: prevItem.description,
+        src: prevItem.src,
+        from: from || "",
+      })
+    );
+  };
+
+  const handleNext = () => {
+    const list = getActiveList();
+    const newIndex = currentIndex < totalItems - 1 ? currentIndex + 1 : 0;
+    const nextItem = list[newIndex];
+
+    setCurrentIndex(newIndex);
+    dispatch(resetPlayer());
+    setCurrentTime(0);
+    setIsRepeatOn(false);
+    dispatch(
+      play({
+        id: nextItem.videoId || nextItem.id,
+        title: nextItem.title,
+        artist: nextItem.artist,
+        description: nextItem.description,
+        src: nextItem.src,
+        from: from || "",
+      })
+    );
+  };
+
+  const random = () => {
+    const list = getActiveList();
+
+    if (list.length <= 1) {
+      return;
+    }
+
+    console.log(isShuffleOn, "isShuffleOn");
+
+    let randomIndex;
+    do {
+      randomIndex = Math.floor(Math.random() * list.length);
+    } while (randomIndex === currentIndex);
+
+    const randomItem = list[randomIndex];
+    console.log(currentIndex, "currentIndex");
+    console.log(randomIndex, "random");
+
+    setCurrentIndex(randomIndex);
+    dispatch(resetPlayer());
+    setCurrentTime(0);
+    setIsRepeatOn(false);
+    dispatch(
+      play({
+        id: randomItem.videoId || randomItem.id,
+        title: randomItem.title,
+        artist: randomItem.artist,
+        description: randomItem.description,
+        src: randomItem.src,
+        from: from || "",
+      })
+    );
+  };
+
+  ///////////////////////////
+  const handleEndPlayback = () => {
+    if (isShuffleOnRef.current) {
+      console.log("Playing random song");
+      random();
+      return;
+    }
+
+    if (isAutoplayOnRef.current) {
+      console.log("Playing next song");
+      handleNext();
+      return;
+    }
+  };
+
+  ////////////////////////////////////
+  useEffect(() => {
     if (!videoId) return;
+    setIsReady(false);
     let ytPlayer;
     loadYouTubeAPI().then((YT) => {
       ytPlayer = new YT.Player(`youtube-player`, {
@@ -71,12 +247,26 @@ const MusicPlayer = (
             setPlayer(event.target);
             setIsReady(true);
             setDuration(Math.floor(event.target.getDuration()));
+
+            event.target.setPlaybackQuality("small");
           },
           onStateChange: (event) => {
             const { data } = event;
             if (data === YT.PlayerState.PLAYING) setIsPlaying(true);
-            if (data === YT.PlayerState.PAUSED || data === YT.PlayerState.ENDED)
-              setIsPlaying(false);
+            if (data === YT.PlayerState.PAUSED) setIsPlaying(false);
+
+            if (data === YT.PlayerState.ENDED) {
+              // Check if repeat is on
+              if (isRepeatOnRef.current) {
+                // Loop the current video
+                event.target.seekTo(0);
+                event.target.playVideo();
+              } else if (isShuffleOnRef.current || isAutoplayOnRef.current) {
+                handleEndPlayback();
+              } else {
+                setIsPlaying(false);
+              }
+            }
           },
         },
       });
@@ -123,8 +313,6 @@ const MusicPlayer = (
   // liked feauture
   const [added, setAdded] = useState(false);
 
-  const favorite = useSelector((state) => state.favorite.favorite);
-
   const musicObj = {};
 
   const handleLikeClick = () => {
@@ -141,15 +329,15 @@ const MusicPlayer = (
       musicObj.title = title;
       musicObj.artist = artist;
       musicObj.description = description;
-      musicObj.src =
-        `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` ||
-        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      musicObj.src = src;
     }
 
     if (added) {
       dispatch(removeFavorite(musicObj));
+      alertCall("Removed from favorite", true);
     } else {
       dispatch(addFavorite(musicObj));
+      alertCall("Added to favorite", true);
     }
   };
 
@@ -172,12 +360,49 @@ const MusicPlayer = (
           mode,
           description,
           src:
+            src ||
             `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` ||
             `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
         })
       );
     }
   }, [videoId]);
+  //////////////////////////////////////////
+  // alert work
+  const [msg, setMsg] = useState({
+    message: "",
+    show: false,
+  });
+
+  const alertCall = (msgs, show) => {
+    if (msg.show) {
+      msg.message = msgs;
+    }
+    setMsg({
+      message: msgs,
+      show: show,
+    });
+    setTimeout(() => {
+      setMsg({
+        message: "",
+        show: false,
+      });
+    }, 1000);
+  };
+
+  const shuffleClick = () => {
+    setIsShuffleOn((prev) => !prev);
+    alertCall("Shuffle mode " + (!isShuffleOn ? "on" : "off"), true);
+    setIsRepeatOn(false);
+    setIsAutoplayOn(false);
+  };
+
+  const repeatClick = () => {
+    setIsRepeatOn((prev) => !prev);
+    alertCall("Repeat mode " + (!isRepeatOn ? "on" : "off"), true);
+    setIsShuffleOn(false);
+    setIsAutoplayOn(false);
+  };
 
   return (
     <>
@@ -194,8 +419,10 @@ const MusicPlayer = (
               <div className="flex items-center space-x-4">
                 <img
                   src={
-                    `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` ||
-                    `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                    src !== ""
+                      ? src
+                      : `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` ||
+                        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
                   }
                   alt="thumb"
                   className="w-12 h-12 rounded object-cover"
@@ -265,7 +492,7 @@ const MusicPlayer = (
                     dispatch(setShowPlayer(false));
                   }}
                 >
-                  <CloseIcon />
+                  <Cross />
                 </Button>
                 <Button
                   variant="ghost"
@@ -289,12 +516,32 @@ const MusicPlayer = (
                     alt="cover"
                   />
                 </div>
-
+                <AlertMessage
+                  message={msg.message}
+                  show={msg.show}
+                  onClose={() => setMsg({ message: "", show: false })}
+                />
                 <Slider
                   value={[currentTime]}
                   max={duration || 100}
                   step={1}
-                  onValueChange={(v) => handleSeek(v[0])}
+                  min={0}
+                  onValueChange={(v) => {
+                    setIsPlaying(false);
+                    handleSeek(v[0]);
+                  }}
+                  onValueCommit={(v) => {
+                    if (!player || !isReady) return;
+
+                    // pause while dragging, then resume after commit
+                    const wasPlaying = isPlaying;
+                    player.seekTo(v[0], true);
+                    setCurrentTime(v[0]);
+
+                    if (wasPlaying) {
+                      player.playVideo();
+                    }
+                  }}
                 />
                 <div className="flex justify-between text-xs text-slate-400">
                   <span>{formatTime(currentTime)}</span>
@@ -305,14 +552,17 @@ const MusicPlayer = (
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleSeek(currentTime - 10)}
+                    disabled={
+                      !["history", "favorite", "playlist"].includes(from)
+                    }
+                    onClick={handlePrevious}
                   >
                     <SkipBack />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleSeek(currentTime - 30)}
+                    onClick={() => handleSeek(currentTime - 10)}
                   >
                     <Rewind />
                   </Button>
@@ -326,20 +576,24 @@ const MusicPlayer = (
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleSeek(currentTime + 30)}
+                    onClick={() => handleSeek(currentTime + 10)}
                   >
                     <FastForward />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleSeek(currentTime + 10)}
+                    disabled={
+                      !["history", "favorite", "playlist"].includes(from)
+                    }
+                    onClick={handleNext}
                   >
                     <SkipForward />
                   </Button>
                 </div>
 
                 <div className="flex justify-between text-xs text-slate-400 pt-2">
+                  {/* like */}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -353,24 +607,93 @@ const MusicPlayer = (
                     />
                     <span>Like</span>
                   </Button>
-                  {/* <Button
+                  {/* shuffle */}
+                  <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setIsShuffleOn(!isShuffleOn)}
+                    onClick={shuffleClick}
                     className={isShuffleOn ? "text-blue-400" : ""}
                   >
                     <Shuffle className="h-4 w-4" />
                     <span>Shuffle</span>
-                  </Button> */}
+                  </Button>
+                  {/* loop */}
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setIsRepeatOn(!isRepeatOn)}
+                    onClick={repeatClick}
                     className={isRepeatOn ? "text-blue-400" : ""}
                   >
                     <Repeat className="h-4 w-4" />
                     <span>Repeat</span>
                   </Button>
+                  {/* menu dots */}
+
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md"
+                      >
+                        <MoreHorizontalIcon className="h-5 w-5 text-white" />
+                      </Button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuPortal>
+                      <DropdownMenuContent className="z-[999999] w-48 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 text-white shadow-xl">
+                        {/* Mute option */}
+                        <DropdownMenuItem
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            setMute(!mute);
+                            if (mute) {
+                              player.setVolume(0);
+                              alertCall("Audio muted", true);
+                            } else {
+                              player.setVolume(100);
+                              alertCall("Audio unmuted", true);
+                            }
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-white/10 rounded-xl"
+                        >
+                          {!mute ? (
+                            <VolumeOff className="h-4 w-4 text-red-400" />
+                          ) : (
+                            <Volume2Icon className="h-4 w-4 text-red-400" />
+                          )}
+                          <span>{!mute ? "Unmute" : "Mute"}</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator className="bg-white/20" />
+
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()} // ✅ stops dropdown from closing
+                          className="flex items-center justify-between px-3 py-2 rounded-xl focus:bg-white/10"
+                        >
+                          <span>AutoPlay</span>
+                          <Switch
+                            id="autoplay"
+                            checked={isAutoplayOn}
+                            onCheckedChange={(checked) => {
+                              setIsAutoplayOn(checked);
+                              alertCall(
+                                !isAutoplayOn
+                                  ? "AutoPlay mode On"
+                                  : "AutoPlay mode Off",
+                                true
+                              );
+                              if (checked) {
+                                setIsShuffleOn(false);
+                                setIsRepeatOn(false);
+                              }
+                            }}
+                            className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-600"
+                          />
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenu>
                 </div>
               </div>
             )}

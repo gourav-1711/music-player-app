@@ -13,30 +13,30 @@ export async function POST(req) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { message: "All fields are required" },
         { status: 400 }
       );
     }
 
-    const user = await user.findOne({ email });
-    if (!user) {
+    const userObj = await user.findOne({ email });
+    if (!userObj) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { message: "Invalid Email or Password" },
         { status: 401 }
       );
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, userObj.password);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { message: "Invalid Email or Password" },
         { status: 401 }
       );
     }
 
     // 🔑 Create JWT with minimal payload
     const token = jwt.sign(
-      { _id: user._id, email: user.email }, 
+      { _id: userObj._id, email: userObj.email }, 
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -51,7 +51,7 @@ export async function POST(req) {
     });
 
     // Strip password before sending user
-    const { password: _, ...safeUser } = user.toObject();
+    const { password: _, ...safeUser } = userObj.toObject();
 
     return NextResponse.json({
       message: "Login successful",
@@ -60,7 +60,7 @@ export async function POST(req) {
     });
   } catch (err) {
     return NextResponse.json(
-      { error: err.message || "Internal Server Error" },
+      { message: err.message || "Internal Server Error" },
       { status: 500 }
     );
   }

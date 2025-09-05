@@ -4,14 +4,16 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useDispatch } from "react-redux";
-import { navigateToPage, PAGES } from "@/app/store/features/navigationSlice";
 import { setSearch } from "@/app/store/features/SearchSlice";
+import { useRouter } from "next/navigation";
 
 export function PlaceholdersAndVanishInput({
   placeholders,
   onChange,
   onSubmit
 }) {
+    const router = useRouter();
+  
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
 
   const intervalRef = useRef(null);
@@ -172,7 +174,7 @@ const dispatch = useDispatch();
     onSubmit && onSubmit(e);
     setValue("");
     dispatch(setSearch(value));
-    dispatch(navigateToPage(PAGES.EXPLORE));
+   router.push(`/explore?search=${value}`)
   };
   return (
     <form

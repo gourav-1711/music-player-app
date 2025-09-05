@@ -1,8 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { navigateToPage, PAGES } from "../store/features/navigationSlice";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -15,9 +14,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logout } from "../store/features/auth";
-import { toast } from "sonner";
 import { updater } from "@/lib/updater";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -41,17 +40,8 @@ export const Header = () => {
   ];
 
   const isLogin = useSelector((state) => state.auth.isLogin);
-  const currentPage = useSelector((state) => state.navigation.currentPage);
 
-  const handleNavigateToPage = (page) => {
-    dispatch(navigateToPage(page));
-  };
 
-  const handleLogout = () => {
-    dispatch(logout());
-    dispatch(navigateToPage(PAGES.HOME));
-    toast("Logout successful");
-  };
 
   const favoriteSongs = useSelector((state) => state.favorite.favorite);
   const history = useSelector((state) => state.history.history);
@@ -84,43 +74,24 @@ export const Header = () => {
     >
       {/* Left: Logo */}
       <div className="text-white text-xl font-bold tracking-wide">
-        <a href="" onClick={() => handleNavigateToPage(PAGES.HOME)}>
-          Music Player
-        </a>
+        <Link href={"/"}>Music Player</Link>
       </div>
 
       {/* Center: Desktop Nav */}
       <nav className="hidden md:flex items-center justify-evenly gap-8 text-white text-sm font-medium">
-        <a
-          href="#explore"
-          onClick={() => {
-            handleNavigateToPage(PAGES.EXPLORE);
-          }}
-          className="hover:text-purple-400 transition"
-        >
+        <Link href="/explore" className="hover:text-purple-400 transition">
           Explore
-        </a>
-        <a
-          href="#playlist"
-          onClick={() => handleNavigateToPage(PAGES.PLAYLIST)}
-          className="hover:text-purple-400 transition"
-        >
+        </Link>
+        <Link href="/playlist" className="hover:text-purple-400 transition">
           Playlists
-        </a>
-        <a
-          href="#history"
-          onClick={() => handleNavigateToPage(PAGES.HISTORY)}
-          className="hover:text-purple-400 transition"
-        >
+        </Link>
+        <Link href={"/history"} className="hover:text-purple-400 transition">
           History
-        </a>
-        <a
-          href="#favorite"
-          onClick={() => handleNavigateToPage(PAGES.FAVORITE)}
-          className="hover:text-purple-400 transition"
-        >
+        </Link>
+        
+        <Link href="/favorite" className="hover:text-purple-400 transition">
           Favorite
-        </a>
+        </Link>
       </nav>
 
       {/* Right: Search + Avatar (Desktop) */}
@@ -136,31 +107,26 @@ export const Header = () => {
         />
 
         {isLogin ? (
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger>
               <Avatar className="cursor-pointer">
-                <AvatarImage
-                  src="https://i.pravatar.cc/150?img=32"
-                  alt="User"
-                />
+                <AvatarFallback className="bg-purple-600 p-3 text-2xl sm:text-3xl font-bold">
+                  {"U"}
+                </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Hello, User</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <a
-                href="#profile"
-                onClick={() => handleNavigateToPage(PAGES.PROFILE)}
-              >
+              <Link href="/profile?tab=profile">
                 <DropdownMenuItem>Profile</DropdownMenuItem>
-              </a>
-              <a
-                href="#settings"
-                onClick={() => handleNavigateToPage(PAGES.PROFILE)}
-              >
+              </Link>
+              <Link href="/profile?tab=settings">
                 <DropdownMenuItem>Settings</DropdownMenuItem>
-              </a>
-              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+              </Link>
+              <Link href="/profile?tab=logout">
+                <DropdownMenuItem>LogOut</DropdownMenuItem>
+              </Link>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
@@ -173,18 +139,12 @@ export const Header = () => {
               <DropdownMenuContent>
                 <DropdownMenuLabel>Not Registered</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <a
-                  href="#register"
-                  onClick={() => handleNavigateToPage(PAGES.LOGIN_REGISTER)}
-                >
+                <Link href="/login-register?tab=register">
                   <DropdownMenuItem>Register</DropdownMenuItem>
-                </a>
-                <a
-                  href="#login"
-                  onClick={() => handleNavigateToPage(PAGES.LOGIN_REGISTER)}
-                >
+                </Link>
+                <Link href="/login-register?tab=login">
                   <DropdownMenuItem>Login</DropdownMenuItem>
-                </a>
+                </Link>
               </DropdownMenuContent>
             </DropdownMenu>
           </Button>
@@ -204,7 +164,8 @@ export function MobileMenu() {
 
   const isLogin = useSelector((state) => state.auth.isLogin);
 
-  const { currentPage } = useSelector((state) => state.navigation);
+  const router = useRouter();
+
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   //
@@ -218,11 +179,11 @@ export function MobileMenu() {
     "Best Mood Change Songs",
   ];
 
-  useEffect(() => {
-    if (open) {
-      setOpen(false);
-    }
-  }, [currentPage]);
+  // useEffect(() => {
+  //   if (open) {
+  //     setOpen(false);
+  //   }
+  // }, [router]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -239,20 +200,16 @@ export function MobileMenu() {
       >
         <div className="mt-10 border-t border-[#1c1633] pt-6 flex items-center gap-4">
           {isLogin ? (
-            <a
-              href="#profile"
-              onClick={() => dispatch(navigateToPage(PAGES.PROFILE))}
-            >
+            <Link href="/profile?tab=profile">
               <Avatar className="cursor-pointer">
-                <AvatarImage src="https://i.pravatar.cc/150?img=32" />
+                <AvatarFallback className="bg-purple-600 p-3 text-2xl sm:text-3xl font-bold">
+                  {"U"}
+                </AvatarFallback>
               </Avatar>
-            </a>
+            </Link>
           ) : (
             <>
-              <a
-                href="#login"
-                onClick={() => dispatch(navigateToPage(PAGES.LOGIN_REGISTER))}
-              >
+              <Link href="/login-register?tab=login">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -260,12 +217,9 @@ export function MobileMenu() {
                 >
                   Login
                 </Button>
-              </a>
+              </Link>
               <span className="text-white text-md font-medium">or &nbsp;</span>
-              <a
-                href="#register"
-                onClick={() => dispatch(navigateToPage(PAGES.LOGIN_REGISTER))}
-              >
+              <Link href="/login-register?tab=register">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -273,43 +227,29 @@ export function MobileMenu() {
                 >
                   Register
                 </Button>
-              </a>
+              </Link>
             </>
           )}
           {isLogin && <span className="text-sm">Hello, User</span>}
         </div>
         <div className="flex flex-col gap-6 mt-2 text-lg font-medium">
-          <a
-            href="#explore"
-            onClick={() => dispatch(navigateToPage(PAGES.EXPLORE))}
-            className="hover:text-purple-400"
-          >
+          <Link href="/explore" className="hover:text-purple-400">
             Explore
-          </a>
-          <a
-            href="#playlist"
-            onClick={() => dispatch(navigateToPage(PAGES.PLAYLIST))}
-            className="hover:text-purple-400"
-          >
+          </Link>
+          <Link href="/playlist" className="hover:text-purple-400">
             Playlists
-          </a>
-          <a
-            href="#history"
-            onClick={() => dispatch(navigateToPage(PAGES.HISTORY))}
-            className="hover:text-purple-400"
-          >
+          </Link>
+          <Link href="/history" className="hover:text-purple-400">
             History
-          </a>
+          </Link>
           {/* fav */}
-          <a
-            href="#favorite"
-            onClick={() => dispatch(navigateToPage(PAGES.FAVORITE))}
-            className="hover:text-purple-400"
-          >
+          <Link href="/favorite" className="hover:text-purple-400">
             Favorite
-          </a>
+          </Link>
           {isLogin && (
-            <Button onClick={() => dispatch(logout())}>LogOut</Button>
+            <Link href="/profile?tab=logout">
+              <Button>LogOut</Button>
+            </Link>
           )}
         </div>
         <div className="flex items-center gap-4">

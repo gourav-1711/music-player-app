@@ -46,6 +46,9 @@ export default function ExpandableCardDemo() {
         id: item.id,
         title: item.title,
         artist: item.artist,
+        description: item.description,
+        from: "favorite",
+        src: item.src,
       })
     );
   };
@@ -162,7 +165,7 @@ export default function ExpandableCardDemo() {
               layoutId={`card-${card.title}-${id}`}
               key={`card-${card.title}-${id}`}
               onClick={() => setActive(card)}
-              className="p-4 flex flex-row justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl cursor-pointer "
+              className=" p-1 sm:p-2 md:p-4 flex md:flex-row justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl cursor-pointer "
             >
               <div className="flex gap-4 flex-row ">
                 <motion.div layoutId={`image-${card.title}-${id}`}>
@@ -185,7 +188,12 @@ export default function ExpandableCardDemo() {
                     layoutId={`description-${card.description}-${id}`}
                     className="text-neutral-600 dark:text-neutral-400 text-left"
                   >
-                    {card.description.slice(0, 50)}
+                    <span className="block md:hidden">
+                      {card.description.slice(0, 20) + "..."}
+                    </span>
+                    <span className="line-clamp-2 hidden md:block">
+                      {card.description.slice(0, 50) + "..."}
+                    </span>
                   </motion.p>
                 </div>
               </div>

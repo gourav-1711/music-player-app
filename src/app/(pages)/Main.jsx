@@ -4,7 +4,7 @@ import CardSlider from "../comman/CardSlider";
 import axios from "axios";
 import Banner from "../comman/Banner";
 
-export default function HomePage() {
+const Main = () => {
   const [bannerData, setBannerData] = useState([]);
   const [bannerLoading, setBannerLoading] = useState(false);
 
@@ -83,9 +83,8 @@ export default function HomePage() {
   }, []);
 
   return (
-    <>
+    <div className="flex flex-col gap-8 pb-24">
       <Banner data={bannerData} loading={bannerLoading} />
-
 
       <CardSlider
         dataObject={trendingData}
@@ -104,6 +103,8 @@ export default function HomePage() {
         loading={popularLoading}
         title={"Most Popular"}
       />
-    </>
+    </div>
   );
-}
+};
+
+export default Main;

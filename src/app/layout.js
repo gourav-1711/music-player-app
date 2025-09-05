@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className={`antialiased dark bg-gray-900`}>
+      <body className={`antialiased dark bg-gray-900 overflow-x-hidden`}>
         
           <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
       </body>

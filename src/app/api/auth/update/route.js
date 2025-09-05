@@ -10,7 +10,8 @@ export async function POST(req) {
     await connectDB();
 
     // 1. Read cookie
-    const token = await cookies().get("music-user")?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("music-user")?.value;
     if (!token) {
       return NextResponse.json({ error: "No token found" }, { status: 401 });
     }
@@ -23,7 +24,8 @@ export async function POST(req) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    const { favoriteSongs, history, name, oldPassword, newPassword } = await req.json();
+    const { favoriteSongs, history, name, oldPassword, newPassword } =
+      await req.json();
 
     // 3. Prepare update data
     const updateData = {};
@@ -33,37 +35,44 @@ export async function POST(req) {
 
     // 4. Handle password change
     if (oldPassword && newPassword) {
-      const user = await user.findById(decoded._id);
-      if (!user) {
+      const userObj = await user.findById(decoded._id);
+      if (!userObj) {
         return NextResponse.json({ error: "user not found" }, { status: 404 });
       }
 
-      const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+      const isPasswordValid = await bcrypt.compare(
+        oldPassword,
+        userObj.password
+      );
       if (!isPasswordValid) {
-        return NextResponse.json({ error: "Old password is incorrect" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Old password is incorrect" },
+          { status: 400 }
+        );
       }
 
       updateData.password = await bcrypt.hash(newPassword, 10);
     }
 
     // 5. Update user
-    const user = await user.findByIdAndUpdate(
+    const userObj = await user.findByIdAndUpdate(
       decoded._id,
       { $set: updateData },
       { new: true }
     );
 
-    if (!user) {
+    if (!userObj) {
       return NextResponse.json({ error: "user not found" }, { status: 404 });
     }
 
     // Strip password
-    const { password: _, ...safeUser } = user.toObject();
+    const { password: _, ...safeUser } = userObj.toObject();
 
     return NextResponse.json({
-      message: oldPassword && newPassword
-        ? "Password changed successfully"
-        : "user updated successfully",
+      message:
+        oldPassword && newPassword
+          ? "Password changed successfully"
+          : "user updated successfully",
       user: safeUser,
     });
   } catch (err) {

@@ -6,12 +6,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import { PlaylistCard } from "../comman/PlaylistCard";
-export default function Explore() {
+import { useSearchParams } from "next/navigation";
+
+const Explore = () => {
+
+  const searchQueary = useSearchParams();
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [apiUrl, setApiUrl] = useState("/api/music/explore");
 
-  const search = useSelector((state) => state.search.search);
+  const search = searchQueary.get("search") || ""
 
   useEffect(() => {
     setLoading(true);
@@ -42,7 +47,7 @@ export default function Explore() {
 
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-8">
       <div className="flex gap-4 py-4  items-center">
         <div className="flex flex-col ">
           <h1 className="text-2xl font-bold text-white">
@@ -72,3 +77,5 @@ export default function Explore() {
     </div>
   );
 }
+
+export default Explore

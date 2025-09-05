@@ -16,21 +16,23 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { login, register } from "@/app/store/features/auth";
-import { navigateToPage } from "@/app/store/features/navigationSlice";
-import { PAGES } from "@/app/store/features/navigationSlice";
 import { addFullFavorite } from "@/app/store/features/favoriteSlice";
 import { addFullHistory } from "../store/features/historySlice";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginRegister() {
   const [activeTab, setActiveTab] = useState("login");
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
-  const hash = window.location.hash.replace("#", "");
+  const route = useRouter();
+
+  const tab = useSearchParams().get("tab");
+  const returnTo = useSearchParams().get("returnTo");
 
   useEffect(() => {
-    setActiveTab(hash);
-  }, [hash]);
+    setActiveTab(tab);
+  }, [tab]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -46,9 +48,15 @@ export default function LoginRegister() {
       dispatch(login(res.data));
       dispatch(addFullFavorite(res.data.user.favoriteSongs));
       dispatch(addFullHistory(res.data.user.history));
-      dispatch(navigateToPage(PAGES.HOME));
+      route.push(returnTo || "/");
     } catch (error) {
-      toast(error.message || "An error occurred. Please try again.");
+      console.log(error);
+
+      toast(
+        error.response?.data?.message ||
+          error.message ||
+          "An error occurred. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +73,7 @@ export default function LoginRegister() {
       console.log(res.data);
       toast("Account created successfully");
       dispatch(register(res.data));
-      dispatch(navigateToPage(PAGES.HOME));
+      route.push(returnTo || "/");
     } catch (error) {
       toast(error.message || "An error occurred. Please try again.");
     } finally {

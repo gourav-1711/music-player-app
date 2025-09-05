@@ -3,28 +3,29 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { combineReducers } from "redux";
 import musicPlayerReducer from "./features/musicPlayerSlice";
-import navigationReducer from "./features/navigationSlice";
+
 import searchReducer from "./features/SearchSlice";
 import favoriteReducer from "./features/favoriteSlice";
 import historyReducer from "./features/historySlice";
 import authReducer from "./features/auth";
+import playlistReducer from "./features/playlist";
 // Configuration for persisting the Redux store
 const persistConfig = {
   key: "root",
   storage,
   // Add any reducers you want to persist here
-  whitelist: ["favorite", "history" ,"navigation" ,"auth"],
+  whitelist: ["favorite", "history", "auth", "playlist"],
   // blacklist: ['navigation'] // Add any reducers you don't want to persist here
 };
 
 // Combine all reducers
 const rootReducer = combineReducers({
   musicPlayer: musicPlayerReducer,
-  navigation: navigationReducer,
   search: searchReducer,
   favorite: favoriteReducer,
   history: historyReducer,
   auth: authReducer,
+  playlist: playlistReducer,
 });
 
 // Create a persisted reducer

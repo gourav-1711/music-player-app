@@ -4,9 +4,11 @@ const initialState = {
   videoId: "",
   artist: "",
   title: "",
+  src: "",
   showPlayer: false,
-  description : "",
-  mode : ""
+  description: "",
+  from: "",
+  mode: "",
 };
 
 export const musicPlayerSlice = createSlice({
@@ -18,9 +20,11 @@ export const musicPlayerSlice = createSlice({
       state.videoId = id;
       state.title = title;
       state.artist = artist;
+      state.src = action.payload.src || "";
       state.showPlayer = true;
       state.description = action.payload.description || "";
       state.mode = action.payload.mode || "";
+      state.from = action.payload.from || "";
     },
     setShowPlayer: (state, action) => {
       state.showPlayer = action.payload;
@@ -29,8 +33,10 @@ export const musicPlayerSlice = createSlice({
       state.videoId = "";
       state.artist = "";
       state.title = "";
+      state.src = "";
       state.showPlayer = false;
       state.mode = "";
+      state.from = "";
     },
   },
 });

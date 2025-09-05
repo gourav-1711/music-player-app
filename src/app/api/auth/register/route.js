@@ -13,7 +13,7 @@ export async function POST(req) {
 
     if (!name || !email || !password) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { message: "All fields are required" },
         { status: 400 }
       );
     }
@@ -21,17 +21,17 @@ export async function POST(req) {
     const existingUser = await user.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
-        { error: "User already exists" },
+        { message: "User already exists" },
         { status: 400 }
       );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await user.create({ name, email, password: hashedPassword });
+    const userObj = await user.create({ name, email, password: hashedPassword });
 
     // 🔑 Create JWT with minimal payload
     const token = jwt.sign(
-      { _id: user._id, email: user.email },
+      { _id: userObj._id, email: userObj.email },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -46,7 +46,7 @@ export async function POST(req) {
     });
 
     // Strip password before sending user back
-    const { password: _, ...safeUser } = user.toObject();
+    const { password: _, ...safeUser } = userObj.toObject();
 
     return NextResponse.json({
       message: "User registered successfully",
@@ -55,7 +55,7 @@ export async function POST(req) {
     });
   } catch (err) {
     return NextResponse.json(
-      { error: err.message || "Internal Server Error" },
+      { message: err.message || "Internal Server Error" },
       { status: 500 }
     );
   }
