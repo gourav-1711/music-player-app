@@ -18,6 +18,8 @@ import {
   Volume,
   Volume2Icon,
   Cross,
+  CrossIcon,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -45,6 +47,14 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import AlertMessage from "../comman/AlertMessage";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const MusicPlayer = () => {
   const { videoId, showPlayer, title, artist, mode, description, src, from } =
@@ -70,7 +80,7 @@ const MusicPlayer = () => {
   const [duration, setDuration] = useState(0);
   const [isRepeatOn, setIsRepeatOn] = useState(false);
   const [isShuffleOn, setIsShuffleOn] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [player, setPlayer] = useState(null);
   const [isReady, setIsReady] = useState(false);
   const [isAutoplayOn, setIsAutoplayOn] = useState(false);
@@ -80,6 +90,9 @@ const MusicPlayer = () => {
   const isRepeatOnRef = useRef(isRepeatOn);
   const isShuffleOnRef = useRef(isShuffleOn);
   const isAutoplayOnRef = useRef(isAutoplayOn);
+
+  // open and close sheet
+  const [open, setOpen] = useState(false);
 
   // Update refs when state changes
   useEffect(() => {
@@ -114,24 +127,6 @@ const MusicPlayer = () => {
       // console.log(currentIndex);
     }
   }, [from, videoId]);
-
-  const repeatSame = () => {
-    console.log("repeatSame");
-    if (player && typeof player.seekTo === "function") {
-      console.log("player.seekTo");
-      player.seekTo(0, true); // jump back to start
-      player.playVideo(); // force play
-      setIsPlaying(true);
-    } else {
-      console.log("handleSeek");
-      handleSeek(0);
-      setIsPlaying(false);
-      setTimeout(() => {
-        setIsPlaying(true);
-        handleSeek(currentTime - 40);
-      }, 500);
-    }
-  };
 
   const handlePrevious = () => {
     const list = getActiveList();
@@ -425,6 +420,9 @@ const MusicPlayer = () => {
                         `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
                   }
                   alt="thumb"
+                  onError={(e) =>
+                    (e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`)
+                  }
                   className="w-12 h-12 rounded object-cover"
                   onClick={() => setIsExpanded((prev) => !prev)}
                 />
@@ -485,20 +483,20 @@ const MusicPlayer = () => {
             {/* Expanded Content */}
             {isExpanded && (
               <div className="mt-6 space-y-4">
-                <Button
-                  className="fixed top-4 left-4 z-[99999]"
+                <button
+                  className="text-slate-400 hover:text-white fixed top-4 left-4 z-[99999]"
                   onClick={() => {
                     if (player) player.pauseVideo();
                     dispatch(setShowPlayer(false));
                   }}
                 >
-                  <Cross />
-                </Button>
+                  <X className="h-5 w-5" />
+                </button>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsExpanded((prev) => !prev)}
-                  className="text-slate-400 hover:text-white fixed top-4 right-4 z-[99999]"
+                  className="text-slate-400 hover:text-white fixed top-3 md:top-4 right-4 z-[99999]"
                 >
                   {isExpanded ? (
                     <ChevronDown className="text-3xl" />
@@ -508,7 +506,11 @@ const MusicPlayer = () => {
                 </Button>
                 <div className="aspect-square max-w-[350px] mx-auto rounded-2xl overflow-hidden">
                   <img
-                    src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+                    src={
+                      src
+                        ? src
+                        : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                    }
                     onError={(e) => {
                       e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                     }}
@@ -691,16 +693,112 @@ const MusicPlayer = () => {
                             className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-600"
                           />
                         </DropdownMenuItem>
+
+                        <DropdownMenuItem onSelect={(e) => setOpen(true)}>
+                          <span className="flex items-center gap-2">
+                            <MoreHorizontalIcon className="h-5 w-5 text-white" />
+                            Your Playlist
+                          </span>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenuPortal>
                   </DropdownMenu>
                 </div>
+                <SideBarContent
+                  playlistName={from}
+                  from={from}
+                  open={open}
+                  setOpen={setOpen}
+                  selectedId={videoId}
+                />
               </div>
             )}
           </Card>
         </div>
       )}
     </>
+  );
+};
+
+const SideBarContent = ({ playlistName, from, open, setOpen, selectedId }) => {
+  const history = useSelector((state) => state.history.history);
+  const favorite = useSelector((state) => state.favorite.favorite);
+  const playlist = useSelector((state) => state.playlist.playlist);
+  const dispatch = useDispatch();
+
+  const getActiveList = () => {
+    if (from === "history") return history;
+    if (from === "favorite") return favorite;
+    if (from === "playlist") return playlist;
+    return [];
+  };
+  const [activeList, setActiveList] = useState([]);
+
+  useEffect(() => {
+    setActiveList(getActiveList());
+  }, [from]);
+
+  const cardClick = (obj)=>{
+    dispatch(resetPlayer())
+    dispatch(
+      play({
+        id: obj.id,
+        title: obj.title,
+        artist: obj.artist,
+        description: obj.description,
+        src: obj.src,
+        from: from || "",
+      })
+    );
+    setTimeout(() => {
+      setOpen(false);
+    }, 300);
+  }
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetContent className="z-[100000] rounded-md bg-gradient-to-b from-gray-800 to-gray-900 backdrop-blur-xl border-l border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-y-scroll [scrollbar-hide]">
+        <SheetHeader>
+          <SheetTitle>Your Playlist</SheetTitle>
+          <SheetDescription>
+            Your Videos in <span className="font-bold capitalize">{from}</span>
+          </SheetDescription>
+        </SheetHeader>
+        <div className="p-2 space-y-3">
+          {activeList.length == 0 && (
+            <div className="text-center text-slate-400">No Playlists Found</div>
+          )}
+          {activeList.length > 0 && (
+            <div className="grid grid-cols-1 gap-4">
+              {activeList.map((item) => {
+                const isActive = item.id === selectedId;
+                return (
+                  <div
+                    onClick={()=>cardClick(item)}
+                    key={item.id}
+                    className={`flex items-center gap-3 p-2 rounded-lg transition cursor-pointer
+            ${
+              isActive
+                ? "bg-blue-600/40 ring-2 ring-blue-400"
+                : "bg-gray-800/40 hover:bg-gray-700/50"
+            }
+          `}
+                  >
+                    <img
+                      src={item.src}
+                      alt={item.title}
+                      className="w-16 h-16 object-cover rounded-md flex-shrink-0"
+                    />
+                    <div className="text-white text-sm md:text-base truncate w-full">
+                      {item.title}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 

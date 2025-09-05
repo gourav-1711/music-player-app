@@ -120,22 +120,22 @@
     @apply bg-background text-foreground;
   }
 }
-button{
+button {
   cursor: pointer !important;
 }
-.mx-width{
-  @apply max-w-[1000px] mx-auto py-5 px-3
+.mx-width {
+  @apply max-w-[1000px] mx-auto py-5 px-3;
 }
 
 .swiper-pagination-bullet {
-  background: #818181 !important; 
-  opacity: 1 !important; 
+  background: #818181 !important;
+  opacity: 1 !important;
   transform: scale(1);
   transition: all 0.3s ease-in-out;
 }
 
 .swiper-pagination-bullet-active {
-  background: #ffffff !important; 
+  background: #ffffff !important;
 }
 .custom-swiper {
   padding-bottom: 20px !important;
@@ -150,22 +150,24 @@ button{
   text-align: center !important;
 } */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
 }
+
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #515151;
+  background: #1f2937; /* Tailwind gray-800 */
+  border-radius: 10px;
 }
 
-/* Handle */
+/* Thumb */
 ::-webkit-scrollbar-thumb {
-  background: #7a06b0;
-  border-radius: 50px;
+  background: linear-gradient(180deg, #1e3a8a, #1e40af); /* dark indigo → blue */
+  border-radius: 10px;
 }
 
-/* Handle on hover */
+/* Thumb hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #9314ce;
+  background: linear-gradient(180deg, #111827, #1e3a8a); /* almost black → dark indigo */
 }
