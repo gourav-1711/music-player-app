@@ -99,7 +99,7 @@ const Profile = () => {
         </div>
       )}
       {!loading && (
-        <div className="max-w-5xl mx-auto px-2 sm:px-4 lg:px-8">
+        <div className="max-w-5xl w-full mx-auto px-2 sm:px-4 lg:px-8 overflow-x-hidden">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-10">
             Your Profile
           </h1>

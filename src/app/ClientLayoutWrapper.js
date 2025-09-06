@@ -7,17 +7,14 @@ import MusicPlayer from "./(pages)/MusicPlayer";
 import { Toaster } from "sonner";
 
 export default function ClientLayoutWrapper({ children }) {
-
-
-
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <div className="min-h-screen flex flex-col bg-gray-900">
+        <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-900 via-blue-900/20 to-gray-900">
+          <MusicPlayer />
           <Header />
           <main className="flex-1">{children}</main>
-          <MusicPlayer />
-          <Toaster  richColors  closeButton={true} theme="dark"/>
+          <Toaster richColors closeButton={true} theme="dark" />
         </div>
       </PersistGate>
     </Provider>

@@ -39,10 +39,10 @@ export default function Banner({ data, loading = true }) {
   return (
     <>
       {loading ? (
-        <Skeleton className="h-[25rem] max-w-[1000px] mx-auto my-4 rounded-3xl overflow-hidden" />
+        <Skeleton className="md:h-[25rem] h-[15rem] max-w-[1000px] mx-auto my-4 rounded-2xl  md:rounded-3xl overflow-hidden w-[98%] md:w-full" />
       ) : (
         <ImagesSlider
-          className="h-[25rem] max-w-[1000px] mx-auto my-4 rounded-3xl overflow-hidden"
+          className="md:h-[25rem] h-[15rem] max-w-[1000px] mx-auto my-4 rounded-2xl  md:rounded-3xl overflow-hidden w-[98%] md:w-full"
           images={images}
         >
           <motion.div

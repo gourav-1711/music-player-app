@@ -3,7 +3,13 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import {
@@ -16,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { updater } from "@/lib/updater";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -40,8 +46,6 @@ export const Header = () => {
   ];
 
   const isLogin = useSelector((state) => state.auth.isLogin);
-
-
 
   const favoriteSongs = useSelector((state) => state.favorite.favorite);
   const history = useSelector((state) => state.history.history);
@@ -88,7 +92,7 @@ export const Header = () => {
         <Link href={"/history"} className="hover:text-purple-400 transition">
           History
         </Link>
-        
+
         <Link href="/favorite" className="hover:text-purple-400 transition">
           Favorite
         </Link>
@@ -166,6 +170,8 @@ export function MobileMenu() {
 
   const router = useRouter();
 
+  const path = usePathname();
+
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   //
@@ -179,11 +185,9 @@ export function MobileMenu() {
     "Best Mood Change Songs",
   ];
 
-  // useEffect(() => {
-  //   if (open) {
-  //     setOpen(false);
-  //   }
-  // }, [router]);
+  useEffect(() => {
+    setOpen(false);
+  }, [path]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -194,11 +198,12 @@ export function MobileMenu() {
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className={`bg-blue-500 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-0 border  text-white p-6 ${
-          showPlayer ? "h-[calc(100vh-1rem)]" : "h-[calc(100vh-4rem)]"
-        }`}
+        className={`bg-blue-500 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-0 border  text-white p-6 z-[100000] h-[90vh] `}
       >
-        <div className="mt-10 border-t border-[#1c1633] pt-6 flex items-center gap-4">
+        <SheetHeader className={"invisible opacity-0 w-0 h-0 overflow-hidden"}>
+          <SheetTitle>Mobile Menu</SheetTitle>
+        </SheetHeader>
+        <div className=" border-t border-[#1c1633] pt-2 flex items-center gap-4">
           {isLogin ? (
             <Link href="/profile?tab=profile">
               <Avatar className="cursor-pointer">
@@ -232,7 +237,7 @@ export function MobileMenu() {
           )}
           {isLogin && <span className="text-sm">Hello, User</span>}
         </div>
-        <div className="flex flex-col gap-6 mt-2 text-lg font-medium">
+        <div className="flex flex-col gap-4 mt-1 text-lg font-medium">
           <Link href="/explore" className="hover:text-purple-400">
             Explore
           </Link>
@@ -258,7 +263,6 @@ export function MobileMenu() {
             className="rounded-lg bg-[#291f47] text-white px-4 py-2 placeholder:text-[#aaa] outline-none w-64"
           />
         </div>
-        .
       </SheetContent>
     </Sheet>
   );

@@ -15,6 +15,15 @@ export default function Playlist() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setPlaylistUrl(e.target.search.value);
+
+    try{
+      const res = axios.post("/api/music/playlist", {
+        playlistUrl,
+      });
+      console.log(res.data);
+    }catch(err){
+      console.log(err);
+    }
   };
 
   return (

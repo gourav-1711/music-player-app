@@ -10,7 +10,7 @@ import { LoaderIcon } from "lucide-react";
 export default function CardSlider({ dataObject, title, loading }) {
   return (
     <>
-      <div className="mx-width select-none !py-0 ">
+      <div className="mx-width w-full select-none !py-0 ">
         <div className="title">
           <h5 className="text-white text-2xl font-bold mb-3.5">{title}</h5>
         </div>

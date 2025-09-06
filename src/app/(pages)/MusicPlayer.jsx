@@ -411,7 +411,7 @@ const MusicPlayer = () => {
           <Card className="w-full h-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-700/40 shadow-2xl p-4 flex flex-col">
             {/* Top Section (always visible) */}
             {!isExpanded && (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4 z-[99999]">
                 <img
                   src={
                     src !== ""
@@ -482,7 +482,7 @@ const MusicPlayer = () => {
 
             {/* Expanded Content */}
             {isExpanded && (
-              <div className="mt-6 space-y-4">
+              <div className="mt-0 md:mt-6 space-y-4">
                 <button
                   className="text-slate-400 hover:text-white fixed top-4 left-4 z-[99999]"
                   onClick={() => {
@@ -496,7 +496,7 @@ const MusicPlayer = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsExpanded((prev) => !prev)}
-                  className="text-slate-400 hover:text-white fixed top-3 md:top-4 right-4 z-[99999]"
+                  className="text-slate-400 hover:text-white fixed top-3 md:top-4 right-2 z-[99999]"
                 >
                   {isExpanded ? (
                     <ChevronDown className="text-3xl" />
@@ -738,8 +738,8 @@ const SideBarContent = ({ playlistName, from, open, setOpen, selectedId }) => {
     setActiveList(getActiveList());
   }, [from]);
 
-  const cardClick = (obj)=>{
-    dispatch(resetPlayer())
+  const cardClick = (obj) => {
+    dispatch(resetPlayer());
     dispatch(
       play({
         id: obj.id,
@@ -752,8 +752,8 @@ const SideBarContent = ({ playlistName, from, open, setOpen, selectedId }) => {
     );
     setTimeout(() => {
       setOpen(false);
-    }, 300);
-  }
+    }, 200);
+  };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className="z-[100000] rounded-md bg-gradient-to-b from-gray-800 to-gray-900 backdrop-blur-xl border-l border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-y-scroll [scrollbar-hide]">
@@ -773,12 +773,12 @@ const SideBarContent = ({ playlistName, from, open, setOpen, selectedId }) => {
                 const isActive = item.id === selectedId;
                 return (
                   <div
-                    onClick={()=>cardClick(item)}
+                    onClick={() => cardClick(item)}
                     key={item.id}
                     className={`flex items-center gap-3 p-2 rounded-lg transition cursor-pointer
             ${
               isActive
-                ? "bg-blue-600/40 ring-2 ring-blue-400"
+                ? "bg-blue-700/30 ring-2 ring-blue-400"
                 : "bg-gray-800/40 hover:bg-gray-700/50"
             }
           `}
