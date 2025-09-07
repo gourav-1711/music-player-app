@@ -1,0 +1,41 @@
+{
+  "name": "Music Mania",
+  "short_name": "MusicMania",
+  "description": "A modern music streaming application with a beautiful interface and seamless experience",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#1e293b",
+  "categories": ["music", "entertainment", "audio"],
+  "icons": [
+    {
+      "src": "/icons/music-player.png",
+      "sizes": "192x192 256x256 384x384 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse Music",
+      "short_name": "Browse",
+      "description": "Explore the latest music",
+      "url": "/explore"
+    },
+    {
+      "name": "Your Playlist",
+      "short_name": "Playlist",
+      "description": "Access your Music Playlist",
+      "url": "/playlist"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "description": "Music Mania Home Screen"
+    }
+  ]
+}

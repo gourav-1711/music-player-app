@@ -36,6 +36,9 @@ const Profile = () => {
   const [details, setDetails] = useState(null);
   const [checked, setChecked] = useState(false);
 
+  const [error, setError] = useState("");
+  const [passwordEdit, setPasswordEdit] = useState(false);
+
   const isLogin = useSelector((state) => state.auth.isLogin);
 
   useEffect(() => {
@@ -57,31 +60,12 @@ const Profile = () => {
       });
   }, [isLogin]);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [newName, setNewName] = useState(details?.name || "");
   const [activeTab, setActiveTab] = useState("profile");
 
   useEffect(() => {
-    setActiveTab(tabName.get("tab"));
+    setActiveTab(tabName.get("tab") || "profile");
   }, [tabName]);
 
-  const handleNameChange = async () => {
-    if (!newName.trim()) {
-      toast.error("Name cannot be empty");
-      return;
-    }
-
-    try {
-      const data = {
-        name: newName,
-      };
-      updater(data);
-      toast("Name updated successfully");
-      setIsEditing(false);
-    } catch (error) {
-      toast.error(error.message || "Failed to update name");
-    }
-  };
   const handleLogout = () => {
     dispatch(logout());
     if (checked) {
@@ -92,8 +76,40 @@ const Profile = () => {
     router.push("/");
   };
 
+  const handleUpdate = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = {};
+
+    if (e.target.name.value == "") {
+      setError("Name is required");
+      return;
+    }
+
+    if (formData.get("name")) data.name = formData.get("name");
+    if (formData.get("oldPassword") && passwordEdit)
+      data.oldPassword = formData.get("oldPassword");
+    if (formData.get("newPassword") && passwordEdit)
+      data.newPassword = formData.get("newPassword");
+
+    axios
+      .post("/api/auth/update", data)
+      .then((res) => {
+        toast("Profile updated successfully");
+        setLoading(false);
+      })
+      .catch((err) => {
+        toast.error(err.message || "Failed to update profile");
+        setError(err.message);
+        setLoading(false);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
   return (
-    <div className=" bg-gradient-to-b from-gray-900 to-black text-white p-1 sm:p-6 md:p-10 overflow-hidden">
+    <div className=" text-white p-1 sm:p-6 md:p-10 overflow-hidden">
       {loading && (
         <div className="flex items-center justify-center h-screen w-full animate-spin">
           <Loader />
@@ -201,6 +217,7 @@ const Profile = () => {
                         Account Settings
                       </CardTitle>
                     </CardHeader>
+
                     <div className="mt-6 space-y-6">
                       <Card className="bg-gray-700 border-none">
                         <CardContent className="p-4 sm:p-6">
@@ -208,65 +225,88 @@ const Profile = () => {
                             Personal Information
                           </h3>
 
-                          {/* Name field */}
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div className="w-full">
+                          {/* Settings Form */}
+                          <form onSubmit={handleUpdate} className="space-y-6">
+                            {/* Name field */}
+                            <div>
                               <p className="text-sm text-gray-400 mb-1">Name</p>
-                              {isEditing ? (
-                                <Input
-                                  type="text"
-                                  value={newName}
-                                  onChange={(e) => setNewName(e.target.value)}
-                                  className="bg-gray-800 text-white w-full"
-                                  autoFocus
-                                />
-                              ) : (
-                                <p className="text-lg">
-                                  {details?.name || "Not set"}
-                                </p>
-                              )}
+                              <Input
+                                type="text"
+                                name="name"
+                                defaultValue={details?.name || ""}
+                                className="bg-gray-800 text-white w-full"
+                              />
                             </div>
-                            <div className="flex space-x-2">
-                              {isEditing ? (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    onClick={handleNameChange}
-                                    className="bg-purple-600 hover:bg-purple-700"
-                                  >
-                                    Save
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() => {
-                                      setIsEditing(false);
-                                      setNewName(details?.name || "");
-                                    }}
-                                  >
-                                    Cancel
-                                  </Button>
-                                </>
-                              ) : (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setIsEditing(true)}
-                                  className="text-purple-400 hover:text-purple-300"
-                                >
-                                  Edit
-                                </Button>
-                              )}
-                            </div>
-                          </div>
 
-                          {/* Email field */}
-                          <div className="mt-6">
-                            <p className="text-sm text-gray-400 mb-1">Email</p>
-                            <p className="text-gray-300">
-                              {details?.email || "Not set"}
+                            {/* Email field (readonly) */}
+                            <div>
+                              <p className="text-sm text-gray-400 mb-1">
+                                Email
+                              </p>
+                              <Input
+                                type="email"
+                                name="email"
+                                value={details?.email || ""}
+                                readOnly
+                                className="bg-gray-800 text-gray-400 w-full"
+                              />
+                            </div>
+                            <div
+                              className={`${passwordEdit ? "block" : "hidden"} space-y-3`}
+                            >
+                              {/* Old Password field */}
+                              <div>
+                                <p className="text-sm text-gray-400 mb-1">
+                                  Old Password
+                                </p>
+                                <Input
+                                  type="password"
+                                  name="oldPassword"
+                                  placeholder="Enter old password"
+                                  className="bg-gray-800 text-white w-full"
+                                />
+                              </div>
+
+                              {/* New Password field */}
+                              <div>
+                                <p className="text-sm text-gray-400 mb-1">
+                                  New Password
+                                </p>
+                                <Input
+                                  type="password"
+                                  name="newPassword"
+                                  placeholder="Enter new password"
+                                  className="bg-gray-800 text-white w-full"
+                                />
+                              </div>
+                            </div>
+                            <p
+                              onClick={() => setPasswordEdit(!passwordEdit)}
+                              className="cursor-pointer text-purple-400"
+                            >
+                              {passwordEdit
+                                ? "Dont Change Password"
+                                : "Change Password"}
                             </p>
-                          </div>
+                            {/* eroor */}
+                            <p className="text-red-500 text-sm font-medium">
+                              {error}
+                            </p>
+                            {/* <p className="text-slate-300 text-sm font-medium">
+                              Fill Password Filled Only IF You Wish To Change
+                              Password
+                            </p> */}
+
+                            {/* Submit button */}
+                            <div className="flex justify-end">
+                              <Button
+                                type="submit"
+                                className="bg-purple-600 hover:bg-purple-700 text-white focus:translate-x-2 focus:translate-y-2 focus:scale-110 transition-all duration-300"
+                              >
+                                Save Changes
+                              </Button>
+                            </div>
+                          </form>
                         </CardContent>
                       </Card>
                     </div>

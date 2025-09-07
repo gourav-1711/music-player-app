@@ -399,16 +399,67 @@ const MusicPlayer = () => {
     setIsAutoplayOn(false);
   };
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (
+        event.target.tagName === "INPUT" ||
+        event.target.tagName === "TEXTAREA"
+      ) {
+        return; // Don't handle shortcuts when typing
+      }
+
+      switch (event.code) {
+        case "Space":
+          event.preventDefault();
+          handlePlayPause();
+          break;
+        case "ArrowLeft":
+          event.preventDefault();
+          handleSeek(Math.max(0, currentTime - 10));
+          break;
+        case "ArrowRight":
+          event.preventDefault();
+          handleSeek(Math.min(duration, currentTime + 10));
+          break;
+        case "ArrowUp":
+          event.preventDefault();
+          handlePrevious();
+          break;
+        case "ArrowDown":
+          event.preventDefault();
+          handleNext();
+          break;
+        case "Esc":
+          event.preventDefault();
+          setIsExpanded(false);
+          break;
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyPress);
+    return () => document.removeEventListener("keydown", handleKeyPress);
+  }, [
+    handlePlayPause,
+    handleSeek,
+    currentTime,
+    duration,
+    handlePrevious,
+    handleNext,
+  ]);
+
   return (
     <>
       <div id={`youtube-player`} style={{ display: "none" }} />
       {showPlayer && (
         <div
-          className={`fixed bottom-0 left-0 right-0 z-[99999] transition-all duration-300 ${
-            isExpanded ? " h-[100vh]" : "h-[80px]"
+          className={`fixed bottom-0 left-0 right-0 z-[99999] transition-all duration-500 ${
+            isExpanded ? " h-svh overflow-hidden" : "h-[80px]"
           }`}
         >
-          <Card className="w-full h-full bg-slate-900 backdrop-blur-lg border-t border-slate-700/40 shadow-2xl p-4 flex flex-col">
+          <Card className="w-full h-full bg-slate-900 backdrop-blur-lg border-t border-slate-700/40 shadow-2xl p-2 md:p-4 flex flex-col">
             {/* Top Section (always visible) */}
             {!isExpanded && (
               <div className="flex items-center space-x-4 z-[99999]">
@@ -473,6 +524,7 @@ const MusicPlayer = () => {
                   onClick={() => {
                     if (player) player.pauseVideo();
                     dispatch(setShowPlayer(false));
+                    dispatch(resetPlayer());
                   }}
                 >
                   <CloseIcon />
@@ -482,235 +534,247 @@ const MusicPlayer = () => {
 
             {/* Expanded Content */}
             {isExpanded && (
-              <div className="mt-0 md:mt-6 space-y-4">
-                <button
-                  className="text-slate-400 hover:text-white fixed top-4 left-4 z-[99999]"
-                  onClick={() => {
-                    if (player) player.pauseVideo();
-                    dispatch(setShowPlayer(false));
-                  }}
-                >
-                  <X className="h-5 w-5" />
-                </button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsExpanded((prev) => !prev)}
-                  className="text-slate-400 hover:text-white fixed top-3 md:top-4 right-2 z-[99999]"
-                >
-                  {isExpanded ? (
-                    <ChevronDown className="text-3xl" />
-                  ) : (
-                    <ChevronUp />
-                  )}
-                </Button>
-                <div className="aspect-square max-w-[350px] mx-auto rounded-2xl overflow-hidden">
-                  <img
-                    src={
-                      src
-                        ? src
-                        : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-                    }
-                    onError={(e) => {
-                      e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                    }}
-                    className="w-full h-full object-cover"
-                    alt="cover"
+              <div className="fixed top-0 left-0 right-0 flex flex-col h-full ">
+                {/* Top buttons */}
+                <div className="flex justify-between pt-6 sticky top-0 left-0 right-0 px-4">
+                  <div className="">
+                    <button
+                      className="text-slate-400 hover:text-white"
+                      onClick={() => {
+                        if (player) player.pauseVideo();
+                        dispatch(setShowPlayer(false));
+                        dispatch(resetPlayer());
+                      }}
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <div className="">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsExpanded((prev) => !prev)}
+                      className="text-slate-400 hover:text-white"
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="text-3xl" />
+                      ) : (
+                        <ChevronUp />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Main middle content */}
+                <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto px-4">
+                  <AlertMessage
+                    message={msg.message}
+                    show={msg.show}
+                    onClose={() => setMsg({ message: "", show: false })}
                   />
-                </div>
-                <AlertMessage
-                  message={msg.message}
-                  show={msg.show}
-                  onClose={() => setMsg({ message: "", show: false })}
-                />
-                <Slider
-                  value={[currentTime]}
-                  max={duration || 100}
-                  step={1}
-                  min={0}
-                  onValueChange={(v) => {
-                    setIsPlaying(false);
-                    handleSeek(v[0]);
-                  }}
-                  onValueCommit={(v) => {
-                    if (!player || !isReady) return;
 
-                    // pause while dragging, then resume after commit
-                    const wasPlaying = isPlaying;
-                    player.seekTo(v[0], true);
-                    setCurrentTime(v[0]);
-
-                    if (wasPlaying) {
-                      player.playVideo();
-                    }
-                  }}
-                />
-                <div className="flex justify-between text-xs text-slate-400">
-                  <span>{formatTime(currentTime)}</span>
-                  <span>{formatTime(duration)}</span>
-                </div>
-
-                <div className="flex justify-center gap-4">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={
-                      !["history", "favorite", "playlist"].includes(from)
-                    }
-                    onClick={handlePrevious}
-                  >
-                    <SkipBack />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleSeek(currentTime - 10)}
-                  >
-                    <Rewind />
-                  </Button>
-                  <Button
-                    onClick={handlePlayPause}
-                    disabled={!isReady}
-                    className="h-12 w-12 rounded-full bg-white text-black"
-                  >
-                    {isPlaying ? <Pause /> : <Play className="ml-1" />}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleSeek(currentTime + 10)}
-                  >
-                    <FastForward />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={
-                      !["history", "favorite", "playlist"].includes(from)
-                    }
-                    onClick={handleNext}
-                  >
-                    <SkipForward />
-                  </Button>
-                </div>
-
-                <div className="flex justify-between text-xs text-slate-400 pt-2">
-                  {/* like */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleLikeClick}
-                    className={added ? "text-red-400" : ""}
-                  >
-                    <Heart
-                      className={`h-4 w-4 ${
-                        added ? "fill-current scale-110" : ""
-                      }`}
+                  <div className="aspect-square max-w-[350px] w-full rounded-2xl overflow-hidden mb-6">
+                    <img
+                      src={
+                        src
+                          ? src
+                          : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                      }
+                      onError={(e) => {
+                        e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                      }}
+                      className="w-full h-full object-cover"
+                      alt="cover"
                     />
-                    <span>Like</span>
-                  </Button>
-                  {/* shuffle */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={shuffleClick}
-                    className={isShuffleOn ? "text-blue-400" : ""}
-                  >
-                    <Shuffle className="h-4 w-4" />
-                    <span>Shuffle</span>
-                  </Button>
-                  {/* loop */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={repeatClick}
-                    className={isRepeatOn ? "text-blue-400" : ""}
-                  >
-                    <Repeat className="h-4 w-4" />
-                    <span>Repeat</span>
-                  </Button>
-                  {/* menu dots */}
+                  </div>
 
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md"
-                      >
-                        <MoreHorizontalIcon className="h-5 w-5 text-white" />
-                      </Button>
-                    </DropdownMenuTrigger>
+                  <Slider
+                    value={[currentTime]}
+                    max={duration || 100}
+                    step={1}
+                    min={0}
+                    onValueChange={(v) => {
+                      setIsPlaying(false);
+                      handleSeek(v[0]);
+                    }}
+                    onValueCommit={(v) => {
+                      if (!player || !isReady) return;
+                      const wasPlaying = isPlaying;
+                      player.seekTo(v[0], true);
+                      setCurrentTime(v[0]);
+                      if (wasPlaying) player.playVideo();
+                    }}
+                  />
+                  <div className="flex justify-between w-full text-xs text-slate-400 mt-2">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                  </div>
 
-                    <DropdownMenuPortal>
-                      <DropdownMenuContent className="z-[999999] w-48 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 text-white shadow-xl">
-                        {/* Mute option */}
-                        <DropdownMenuItem
-                          onSelect={(e) => {
-                            e.preventDefault();
-                            setMute(!mute);
-                            if (mute) {
-                              player.setVolume(0);
-                              alertCall("Audio muted", true);
-                            } else {
-                              player.setVolume(100);
-                              alertCall("Audio unmuted", true);
-                            }
-                          }}
-                          className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-white/10 rounded-xl"
+                  <div className="flex justify-center gap-4 mt-6">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={
+                        !["history", "favorite", "playlist"].includes(from)
+                      }
+                      onClick={handlePrevious}
+                    >
+                      <SkipBack />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleSeek(currentTime - 10)}
+                    >
+                      <Rewind />
+                    </Button>
+                    <Button
+                      onClick={handlePlayPause}
+                      disabled={!isReady}
+                      className="h-12 w-12 rounded-full bg-white text-black"
+                    >
+                      {isPlaying ? <Pause /> : <Play className="ml-1" />}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleSeek(currentTime + 10)}
+                    >
+                      <FastForward />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={
+                        !["history", "favorite", "playlist"].includes(from)
+                      }
+                      onClick={handleNext}
+                    >
+                      <SkipForward />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* End buttons pinned at bottom */}
+                <div className="shrink-0 px-4 pb-[env(safe-area-inset-bottom)]">
+                  <div className="flex justify-between text-xs text-slate-400 pt-2">
+                    {/* like */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleLikeClick}
+                      className={added ? "text-red-400" : ""}
+                    >
+                      <Heart
+                        className={`h-4 w-4 ${
+                          added ? "fill-current scale-110" : ""
+                        }`}
+                      />
+                      <span>Like</span>
+                    </Button>
+                    {/* shuffle */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={shuffleClick}
+                      className={isShuffleOn ? "text-blue-400" : ""}
+                    >
+                      <Shuffle className="h-4 w-4" />
+                      <span>Shuffle</span>
+                    </Button>
+                    {/* loop */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={repeatClick}
+                      className={isRepeatOn ? "text-blue-400" : ""}
+                    >
+                      <Repeat className="h-4 w-4" />
+                      <span>Repeat</span>
+                    </Button>
+                    {/* menu dots */}
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md"
                         >
-                          {!mute ? (
-                            <VolumeOff className="h-4 w-4 text-red-400" />
-                          ) : (
-                            <Volume2Icon className="h-4 w-4 text-red-400" />
-                          )}
-                          <span>{!mute ? "Unmute" : "Mute"}</span>
-                        </DropdownMenuItem>
+                          <MoreHorizontalIcon className="h-5 w-5 text-white" />
+                        </Button>
+                      </DropdownMenuTrigger>
 
-                        <DropdownMenuSeparator className="bg-white/20" />
-
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()} // ✅ stops dropdown from closing
-                          className="flex items-center justify-between px-3 py-2 rounded-xl focus:bg-white/10"
-                        >
-                          <span>AutoPlay</span>
-                          <Switch
-                            id="autoplay"
-                            checked={isAutoplayOn}
-                            onCheckedChange={(checked) => {
-                              setIsAutoplayOn(checked);
-                              alertCall(
-                                !isAutoplayOn
-                                  ? "AutoPlay mode On"
-                                  : "AutoPlay mode Off",
-                                true
-                              );
-                              if (checked) {
-                                setIsShuffleOn(false);
-                                setIsRepeatOn(false);
+                      <DropdownMenuPortal>
+                        <DropdownMenuContent className="z-[999999] w-48 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 text-white shadow-xl">
+                          {/* Mute option */}
+                          <DropdownMenuItem
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              setMute(!mute);
+                              if (mute) {
+                                player.setVolume(0);
+                                alertCall("Audio muted", true);
+                              } else {
+                                player.setVolume(100);
+                                alertCall("Audio unmuted", true);
                               }
                             }}
-                            className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-600"
-                          />
-                        </DropdownMenuItem>
+                            className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-white/10 rounded-xl"
+                          >
+                            {!mute ? (
+                              <VolumeOff className="h-4 w-4 text-red-400" />
+                            ) : (
+                              <Volume2Icon className="h-4 w-4 text-red-400" />
+                            )}
+                            <span>{!mute ? "Unmute" : "Mute"}</span>
+                          </DropdownMenuItem>
 
-                        <DropdownMenuItem onSelect={(e) => setOpen(true)}>
-                          <span className="flex items-center gap-2">
-                            <MoreHorizontalIcon className="h-5 w-5 text-white" />
-                            Your Playlist
-                          </span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenu>
+                          <DropdownMenuSeparator className="bg-white/20" />
+
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()} // ✅ stops dropdown from closing
+                            className="flex items-center justify-between px-3 py-2 rounded-xl focus:bg-white/10"
+                          >
+                            <span>AutoPlay</span>
+                            <Switch
+                              id="autoplay"
+                              checked={isAutoplayOn}
+                              onCheckedChange={(checked) => {
+                                setIsAutoplayOn(checked);
+                                alertCall(
+                                  !isAutoplayOn
+                                    ? "AutoPlay mode On"
+                                    : "AutoPlay mode Off",
+                                  true
+                                );
+                                if (checked) {
+                                  setIsShuffleOn(false);
+                                  setIsRepeatOn(false);
+                                }
+                              }}
+                              className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-600"
+                            />
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem onSelect={(e) => setOpen(true)}>
+                            <span className="flex items-center gap-2">
+                              <MoreHorizontalIcon className="h-5 w-5 text-white" />
+                              Your Playlist
+                            </span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenu>
+                  </div>
+
+                  <SideBarContent
+                    playlistName={from}
+                    from={from}
+                    open={open}
+                    setOpen={setOpen}
+                    selectedId={videoId}
+                  />
                 </div>
-                <SideBarContent
-                  playlistName={from}
-                  from={from}
-                  open={open}
-                  setOpen={setOpen}
-                  selectedId={videoId}
-                />
               </div>
             )}
           </Card>
@@ -725,7 +789,6 @@ const SideBarContent = ({ playlistName, from, open, setOpen, selectedId }) => {
   const favorite = useSelector((state) => state.favorite.favorite);
   const playlist = useSelector((state) => state.playlist.videos);
 
-
   const dispatch = useDispatch();
 
   const getActiveList = () => {
@@ -739,7 +802,6 @@ const SideBarContent = ({ playlistName, from, open, setOpen, selectedId }) => {
   useEffect(() => {
     setActiveList(getActiveList());
   }, [from]);
-  console.log(activeList);
 
   const cardClick = (obj) => {
     dispatch(resetPlayer());
@@ -768,7 +830,9 @@ const SideBarContent = ({ playlistName, from, open, setOpen, selectedId }) => {
         </SheetHeader>
         <div className="p-2 space-y-3">
           {activeList.length == 0 && (
-            <div className="text-center text-slate-400">No Playlists Found</div>
+            <div className="text-center text-slate-400">
+              No Playlists Found Try Playing From Playlist , Favorite , History{" "}
+            </div>
           )}
           {activeList.length > 0 && (
             <div className="grid grid-cols-1 gap-4">

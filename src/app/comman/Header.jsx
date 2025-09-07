@@ -23,6 +23,7 @@ import {
 import { updater } from "@/lib/updater";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 
 export const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -74,16 +75,18 @@ export const Header = () => {
 
   return (
     <header
-      className={`sticky top-0 flex items-center justify-between px-6  
+      className={`sticky  flex items-center justify-between px-6  
   rounded-2xl border border-white/20 z-[50]
   bg-gradient-to-r from-gray-800/20 via-gray-500/10 to-gray-800/20 
   backdrop-blur-md shadow-lg duration-300 max-w-[100%] mx-auto ${
-    scrolled ? "bg-gray-800/50 py-3 w-[95%] my-2" : "py-4 w-[100%]"
+    scrolled ? "bg-gray-800/50 py-2 w-[95%] my-2 top-2" : "py-3 w-[100%] top-0"
   }`}
     >
       {/* Left: Logo */}
       <div className="text-white text-xl font-bold tracking-wide">
-        <Link href={"/"}>Music Player</Link>
+        <Link href={"/"}>
+        <Image src="/icons/music-player.png" alt="Music Player" width={50} height={50} />
+        </Link>
       </div>
 
       {/* Center: Desktop Nav */}
@@ -200,7 +203,7 @@ export function MobileMenu() {
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className={`bg-blue-500 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-0 border  text-white p-6 z-[100000] h-[78vh] `}
+        className={`bg-blue-500 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-0 border  text-white p-6 z-[100000] h-[90vh] `}
       >
         <SheetHeader className={"invisible opacity-0 w-0 h-0 overflow-hidden"}>
           <SheetTitle>Mobile Menu</SheetTitle>
