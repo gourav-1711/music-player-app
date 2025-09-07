@@ -167,7 +167,3 @@ button {
   border-radius: 10px;
 }
 
-/* Thumb hover */
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #111827, #1e3a8a); /* almost black → dark indigo */
-}

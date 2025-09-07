@@ -46,9 +46,11 @@ export const Header = () => {
   ];
 
   const isLogin = useSelector((state) => state.auth.isLogin);
+  const user = useSelector((state) => state.auth.details);
 
   const favoriteSongs = useSelector((state) => state.favorite.favorite);
   const history = useSelector((state) => state.history.history);
+  const playlist = useSelector((state) => state.playlist.playlist);
 
   //
 
@@ -63,9 +65,12 @@ export const Header = () => {
     if (history?.length > 0) {
       data.history = history;
     }
+    if (playlist) {
+      data.playlist = playlist;
+    }
     updater(data);
     return;
-  }, [favoriteSongs, history, isLogin]);
+  }, [favoriteSongs, history, isLogin, playlist]);
 
   return (
     <header
@@ -115,7 +120,7 @@ export const Header = () => {
             <DropdownMenuTrigger>
               <Avatar className="cursor-pointer">
                 <AvatarFallback className="bg-purple-600 p-3 text-2xl sm:text-3xl font-bold">
-                  {"U"}
+                  {user?.name?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
@@ -164,15 +169,12 @@ export const Header = () => {
 };
 
 export function MobileMenu() {
-  const { showPlayer } = useSelector((state) => state.musicPlayer);
-
   const isLogin = useSelector((state) => state.auth.isLogin);
 
-  const router = useRouter();
+  const user = useSelector((state) => state.auth.details);
 
   const path = usePathname();
 
-  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   //
 
@@ -198,7 +200,7 @@ export function MobileMenu() {
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className={`bg-blue-500 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-0 border  text-white p-6 z-[100000] h-[90vh] `}
+        className={`bg-blue-500 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-0 border  text-white p-6 z-[100000] h-[78vh] `}
       >
         <SheetHeader className={"invisible opacity-0 w-0 h-0 overflow-hidden"}>
           <SheetTitle>Mobile Menu</SheetTitle>
@@ -208,7 +210,7 @@ export function MobileMenu() {
             <Link href="/profile?tab=profile">
               <Avatar className="cursor-pointer">
                 <AvatarFallback className="bg-purple-600 p-3 text-2xl sm:text-3xl font-bold">
-                  {"U"}
+                  {user?.name?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
             </Link>
@@ -235,7 +237,7 @@ export function MobileMenu() {
               </Link>
             </>
           )}
-          {isLogin && <span className="text-sm">Hello, User</span>}
+          {isLogin && <span className="text-sm">Hello, {user?.name}</span>}
         </div>
         <div className="flex flex-col gap-4 mt-1 text-lg font-medium">
           <Link href="/explore" className="hover:text-purple-400">

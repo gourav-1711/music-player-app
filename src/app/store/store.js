@@ -14,7 +14,7 @@ const persistConfig = {
   key: "root",
   storage,
   // Add any reducers you want to persist here
-  whitelist: ["favorite", "history", "auth", "playlist"],
+  whitelist: ["favorite", "history", "playlist" , "musicPlayer"],
   // blacklist: ['navigation'] // Add any reducers you don't want to persist here
 };
 

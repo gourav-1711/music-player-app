@@ -9,6 +9,8 @@ export async function POST(req) {
   try {
     await connectDB();
 
+    const cookieStore = await cookies();
+
     const { email, password } = await req.json();
 
     if (!email || !password) {
@@ -36,23 +38,33 @@ export async function POST(req) {
 
     // 🔑 Create JWT with minimal payload
     const token = jwt.sign(
-      { _id: userObj._id, email: userObj.email }, 
+      { _id: userObj._id, email: userObj.email },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     // 🍪 Store JWT in cookie
-    cookies().set("music-user", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+    cookieStore.set("music-user", token, {
+      httpOnly: false,
       path: "/",
-      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 
     // Strip password before sending user
     const { password: _, ...safeUser } = userObj.toObject();
 
+    cookieStore.set(
+      "details",
+      JSON.stringify({
+        name: userObj.name,
+        email: userObj.email,
+      }),
+      {
+        httpOnly: false,
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+      }
+    );
     return NextResponse.json({
       message: "Login successful",
       user: safeUser,

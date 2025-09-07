@@ -13,7 +13,7 @@ export async function POST(req) {
     const cookieStore = await cookies();
     const token = cookieStore.get("music-user")?.value;
     if (!token) {
-      return NextResponse.json({ error: "No token found" }, { status: 401 });
+      return NextResponse.json({ message: "No token found" }, { status: 401 });
     }
 
     // 2. Verify JWT
@@ -21,10 +21,16 @@ export async function POST(req) {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (err) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+      if (err.name === "TokenExpiredError") {
+        return NextResponse.json(
+          { message: "please log in again" },
+          { status: 401 }
+        );
+      }
+      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
     }
 
-    const { favoriteSongs, history, name, oldPassword, newPassword } =
+    const { favoriteSongs, history, name, oldPassword, newPassword, playlist } =
       await req.json();
 
     // 3. Prepare update data
@@ -32,12 +38,16 @@ export async function POST(req) {
     if (favoriteSongs !== undefined) updateData.favoriteSongs = favoriteSongs;
     if (history !== undefined) updateData.history = history;
     if (name !== undefined) updateData.name = name;
+    if (playlist !== undefined) updateData.playlist = playlist;
 
     // 4. Handle password change
     if (oldPassword && newPassword) {
       const userObj = await user.findById(decoded._id);
       if (!userObj) {
-        return NextResponse.json({ error: "user not found" }, { status: 404 });
+        return NextResponse.json(
+          { message: "user not found" },
+          { status: 404 }
+        );
       }
 
       const isPasswordValid = await bcrypt.compare(
@@ -46,7 +56,7 @@ export async function POST(req) {
       );
       if (!isPasswordValid) {
         return NextResponse.json(
-          { error: "Old password is incorrect" },
+          { message: "Old password is incorrect" },
           { status: 400 }
         );
       }
@@ -62,11 +72,43 @@ export async function POST(req) {
     );
 
     if (!userObj) {
-      return NextResponse.json({ error: "user not found" }, { status: 404 });
+      return NextResponse.json({ message: "user not found" }, { status: 404 });
     }
 
     // Strip password
     const { password: _, ...safeUser } = userObj.toObject();
+
+     // 6. Refresh token only once per day
+     const now = Math.floor(Date.now() / 1000); // seconds
+     const hour = 60 * 60;
+
+ 
+     if (!decoded.iat || now - decoded.iat > hour) {
+       const newToken = jwt.sign(
+         { _id: safeUser._id, email: safeUser.email },
+         process.env.JWT_SECRET,
+         { expiresIn: "7d" }
+       );
+ 
+       cookieStore.set("music-user", newToken, {
+         httpOnly: false, // ⚠️ should be true in production
+         path: "/",
+         maxAge: 7 * 24 * 60 * 60, // 7 days
+       });
+
+       cookieStore.set(
+        "details",
+        JSON.stringify({
+          name: userObj.name,
+          email: userObj.email,
+        }),
+        {
+          httpOnly: false,
+          path: "/",
+          maxAge: 7 * 24 * 60 * 60, // 7 days
+        }
+      );
+     }
 
     return NextResponse.json({
       message:
@@ -77,7 +119,7 @@ export async function POST(req) {
     });
   } catch (err) {
     return NextResponse.json(
-      { error: err.message || "Internal Server Error" },
+      { message: err.message || "Internal Server Error" },
       { status: 500 }
     );
   }

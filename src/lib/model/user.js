@@ -12,6 +12,10 @@ const UserSchema = new mongoose.Schema({
     type: [Object],
     default: [],
   },
+  playlist: {
+    type: Object,
+    default: {},
+  },
 });
 
 const user = mongoose.models.User || mongoose.model("User", UserSchema);

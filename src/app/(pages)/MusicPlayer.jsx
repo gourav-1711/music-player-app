@@ -45,7 +45,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import AlertMessage from "../comman/AlertMessage";
 import {
   Sheet,
@@ -69,7 +68,8 @@ const MusicPlayer = () => {
 
   const history = useSelector((state) => state.history.history);
   const favorite = useSelector((state) => state.favorite.favorite);
-  const playlist = useSelector((state) => state.playlist.playlist);
+  const playlist = useSelector((state) => state.playlist.videos);
+
   const dispatch = useDispatch();
 
   const [currentIndex, setCurrentIndex] = useState(-1);
@@ -405,10 +405,10 @@ const MusicPlayer = () => {
       {showPlayer && (
         <div
           className={`fixed bottom-0 left-0 right-0 z-[99999] transition-all duration-300 ${
-            isExpanded ? " h-svh" : "h-[80px]"
+            isExpanded ? " h-[100vh]" : "h-[80px]"
           }`}
         >
-          <Card className="w-full h-full bg-slate-900/90 backdrop-blur-lg border-t border-slate-700/40 shadow-2xl p-4 flex flex-col">
+          <Card className="w-full h-full bg-slate-900 backdrop-blur-lg border-t border-slate-700/40 shadow-2xl p-4 flex flex-col">
             {/* Top Section (always visible) */}
             {!isExpanded && (
               <div className="flex items-center space-x-4 z-[99999]">
@@ -723,7 +723,9 @@ const MusicPlayer = () => {
 const SideBarContent = ({ playlistName, from, open, setOpen, selectedId }) => {
   const history = useSelector((state) => state.history.history);
   const favorite = useSelector((state) => state.favorite.favorite);
-  const playlist = useSelector((state) => state.playlist.playlist);
+  const playlist = useSelector((state) => state.playlist.videos);
+
+
   const dispatch = useDispatch();
 
   const getActiveList = () => {
@@ -737,6 +739,7 @@ const SideBarContent = ({ playlistName, from, open, setOpen, selectedId }) => {
   useEffect(() => {
     setActiveList(getActiveList());
   }, [from]);
+  console.log(activeList);
 
   const cardClick = (obj) => {
     dispatch(resetPlayer());

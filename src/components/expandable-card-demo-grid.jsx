@@ -163,7 +163,7 @@ export default function ExpandableCardDemo() {
                     width={100}
                     height={100}
                     src={card.src}
-                    alt={card.title.slice(0, 25) + "..."}
+                    alt={card.title + "..."}
                     className="h-60 w-full  rounded-lg object-cover object-top"
                   />
                 </motion.div>

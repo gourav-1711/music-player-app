@@ -24,9 +24,9 @@ import {
 import { clearFavorite } from "../store/features/favoriteSlice";
 import { clearHistory } from "../store/features/historySlice";
 import { useRouter, useSearchParams } from "next/navigation";
+import { removePlaylist, resetPlaylist } from "../store/features/playlist";
 
 const Profile = () => {
-
   const router = useRouter();
 
   const tabName = useSearchParams();
@@ -34,7 +34,7 @@ const Profile = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [details, setDetails] = useState(null);
-  const [ checked, setChecked ] = useState(false);
+  const [checked, setChecked] = useState(false);
 
   const isLogin = useSelector((state) => state.auth.isLogin);
 
@@ -61,9 +61,9 @@ const Profile = () => {
   const [newName, setNewName] = useState(details?.name || "");
   const [activeTab, setActiveTab] = useState("profile");
 
-  useEffect(()=>{
-    setActiveTab(tabName.get("tab"))
-  },[tabName])
+  useEffect(() => {
+    setActiveTab(tabName.get("tab"));
+  }, [tabName]);
 
   const handleNameChange = async () => {
     if (!newName.trim()) {
@@ -84,15 +84,16 @@ const Profile = () => {
   };
   const handleLogout = () => {
     dispatch(logout());
-    if(checked){
+    if (checked) {
       dispatch(clearHistory());
       dispatch(clearFavorite());
+      dispatch(resetPlaylist());
     }
-    router.push("/")
+    router.push("/");
   };
 
   return (
-    <div className=" bg-gradient-to-b from-gray-900 to-black text-white p-1 sm:p-6 md:p-10">
+    <div className=" bg-gradient-to-b from-gray-900 to-black text-white p-1 sm:p-6 md:p-10 overflow-hidden">
       {loading && (
         <div className="flex items-center justify-center h-screen w-full animate-spin">
           <Loader />
@@ -123,7 +124,7 @@ const Profile = () => {
                 <Separator className="bg-gray-700 w-full" />
 
                 <Tabs
-                  value={activeTab}
+                  value={activeTab || "profile"}
                   onValueChange={setActiveTab}
                   className="w-full mt-4"
                 >
@@ -307,7 +308,10 @@ const Profile = () => {
                         </DialogContent>
                       </Dialog>
                       <div className=" my-2 flex items-center gap-2">
-                        <Checkbox checked={checked} onCheckedChange={setChecked} />
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={setChecked}
+                        />
                         <p>Remove My Saved Data</p>
                       </div>
                     </div>

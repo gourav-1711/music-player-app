@@ -49,10 +49,7 @@ export async function POST(req) {
       if (videosData.items) {
         videos.push(
           ...videosData.items.map((item) => ({
-            id: item.snippet.resourceId.videoId,
-            title: item.snippet.title,
-            thumbnail: item.snippet.thumbnails?.medium?.url,
-            channelTitle: item.snippet.videoOwnerChannelTitle,
+            ...item,
           }))
         );
       }

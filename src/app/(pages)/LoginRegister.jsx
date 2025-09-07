@@ -19,6 +19,7 @@ import { login, register } from "@/app/store/features/auth";
 import { addFullFavorite } from "@/app/store/features/favoriteSlice";
 import { addFullHistory } from "../store/features/historySlice";
 import { useRouter, useSearchParams } from "next/navigation";
+import { addFullPlaylist } from "../store/features/playlist";
 
 export default function LoginRegister() {
   const [activeTab, setActiveTab] = useState("login");
@@ -48,6 +49,9 @@ export default function LoginRegister() {
       dispatch(login(res.data));
       dispatch(addFullFavorite(res.data.user.favoriteSongs));
       dispatch(addFullHistory(res.data.user.history));
+      if (res.data.user.playlist.videos?.length > 0) {
+        dispatch(addFullPlaylist(res.data.user.playlist));
+      }
       route.push(returnTo || "/");
     } catch (error) {
       console.log(error);
@@ -96,7 +100,7 @@ export default function LoginRegister() {
         </CardHeader>
         <CardContent className="p-6">
           <Tabs
-            value={activeTab}
+            value={activeTab || "login"}
             onValueChange={setActiveTab}
             className="w-full"
           >

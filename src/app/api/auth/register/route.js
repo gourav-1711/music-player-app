@@ -1,13 +1,15 @@
 import { connectDB } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import user from "@/lib/model/user";
+import { cookies } from "next/headers";
 
 export async function POST(req) {
   try {
     await connectDB();
+
+    const cookieStore = await cookies();
 
     const { name, email, password } = await req.json();
 
@@ -27,7 +29,11 @@ export async function POST(req) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userObj = await user.create({ name, email, password: hashedPassword });
+    const userObj = await user.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
 
     // 🔑 Create JWT with minimal payload
     const token = jwt.sign(
@@ -37,13 +43,24 @@ export async function POST(req) {
     );
 
     // 🍪 Store JWT in cookie
-    cookies().set("music-user", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+    cookieStore.set("music-user", token, {
+      httpOnly: false,
       path: "/",
-      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
+
+    cookieStore.set(
+      "details",
+      JSON.stringify({
+        name: userObj.name,
+        email: userObj.email,
+      }),
+      {
+        httpOnly: false,
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+      }
+    );
 
     // Strip password before sending user back
     const { password: _, ...safeUser } = userObj.toObject();
