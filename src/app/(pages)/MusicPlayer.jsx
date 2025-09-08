@@ -56,7 +56,7 @@ import {
 } from "@/components/ui/sheet";
 
 const MusicPlayer = () => {
-  const { videoId, showPlayer, title, artist, mode, description, src, from } =
+  let { videoId, showPlayer, title, artist, mode, description, src, from } =
     useSelector((state) => state.musicPlayer);
 
   const getActiveList = () => {
@@ -459,6 +459,20 @@ const MusicPlayer = () => {
     }
   }, [isExpanded]);
 
+  const resetPlayers = () => {
+    if (player) {
+      player.pauseVideo();
+    }
+    // videoId = "";
+    // title = "";
+    // artist = "";
+    // description = "";
+    // src = "";
+    setIsExpanded(false);
+    // dispatch(setShowPlayer(false));
+    dispatch(resetPlayer());
+  };
+
   return (
     <>
       <div id={`youtube-player`} style={{ display: "none" }} />
@@ -529,13 +543,7 @@ const MusicPlayer = () => {
                 >
                   {isExpanded ? <ChevronDown /> : <ChevronUp />}
                 </Button>
-                <Button
-                  onClick={() => {
-                    if (player) player.pauseVideo();
-                    dispatch(setShowPlayer(false));
-                    dispatch(resetPlayer());
-                  }}
-                >
+                <Button onClick={resetPlayers}>
                   <CloseIcon />
                 </Button>
               </div>
@@ -550,11 +558,7 @@ const MusicPlayer = () => {
                     variant="ghost"
                     size="icon"
                     className="text-slate-400 hover:text-white h-10 w-10"
-                    onClick={() => {
-                      if (player) player.pauseVideo();
-                      dispatch(setShowPlayer(false));
-                      dispatch(resetPlayer());
-                    }}
+                    onClick={resetPlayers}
                   >
                     <X className="h-5 w-5" />
                   </Button>
