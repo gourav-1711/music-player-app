@@ -60,7 +60,7 @@ const Footer = () => {
 
   // Mobile Footer
   const MobileFooter = () => (
-    <nav className="container mx-auto px-4">
+    <nav className="container mx-auto px-1 sm:px-4">
       <ul className="flex justify-around items-center h-16 flex-wrap">
         {navItems.map((item) => (
           <li key={item.path} className="flex-1 flex justify-center">
@@ -151,7 +151,7 @@ const Footer = () => {
       </footer>
 
       {/* Desktop Footer */}
-      <footer className="hidden md:block bg-slate-900 border-t border-slate-800">
+      <footer className=" bg-slate-900 border-t border-slate-800">
         <DesktopFooter />
       </footer>
     </>

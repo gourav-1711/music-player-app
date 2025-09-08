@@ -450,17 +450,26 @@ const MusicPlayer = () => {
     handleNext,
   ]);
 
+  // window scroll stop
+  useEffect(() => {
+    if (isExpanded && showPlayer) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [isExpanded]);
+
   return (
     <>
       <div id={`youtube-player`} style={{ display: "none" }} />
       {showPlayer && (
         <div
           className={`fixed bottom-0 left-0 right-0 z-[99999] transition-all duration-500 ${
-            isExpanded ? " h-svh overflow-hidden" : "h-[80px]"
+            isExpanded ? "min-h-svh h-screen" : "h-[70px] sm:h-[80px]"
           }`}
         >
-          <Card className="w-full h-full bg-slate-900 backdrop-blur-lg border-t border-slate-700/40 shadow-2xl p-2 md:p-4 flex flex-col">
-            {/* Top Section (always visible) */}
+          <Card className="w-full h-full bg-slate-900 backdrop-blur-lg border-t border-slate-700/40 shadow-2xl p-1 sm:p-2 md:p-4 flex flex-col">
+            {/* Collapsed Player (Mini Player) */}
             {!isExpanded && (
               <div className="flex items-center space-x-4 z-[99999]">
                 <img
@@ -532,53 +541,49 @@ const MusicPlayer = () => {
               </div>
             )}
 
-            {/* Expanded Content */}
+            {/* Expanded Player (Full Screen) */}
             {isExpanded && (
-              <div className="fixed top-0 left-0 right-0 flex flex-col h-full ">
-                {/* Top buttons */}
-                <div className="flex justify-between pt-6 sticky top-0 left-0 right-0 px-4">
-                  <div className="">
-                    <button
-                      className="text-slate-400 hover:text-white"
-                      onClick={() => {
-                        if (player) player.pauseVideo();
-                        dispatch(setShowPlayer(false));
-                        dispatch(resetPlayer());
-                      }}
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                  </div>
-                  <div className="">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setIsExpanded((prev) => !prev)}
-                      className="text-slate-400 hover:text-white"
-                    >
-                      {isExpanded ? (
-                        <ChevronDown className="text-3xl" />
-                      ) : (
-                        <ChevronUp />
-                      )}
-                    </Button>
-                  </div>
+              <div className="fixed overflow-hidden top-0 left-0 right-0 flex flex-col h-full">
+                {/* Header with close/minimize buttons */}
+                <div className="flex justify-between items-center p-4 sm:p-6 pt-safe-top sticky top-10 md:top-0 z-50 bg-slate-900/80 backdrop-blur-sm">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-slate-400 hover:text-white h-10 w-10"
+                    onClick={() => {
+                      if (player) player.pauseVideo();
+                      dispatch(setShowPlayer(false));
+                      dispatch(resetPlayer());
+                    }}
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsExpanded((prev) => !prev)}
+                    className="text-slate-400 hover:text-white h-10 w-10"
+                  >
+                    <ChevronDown className="h-6 w-6" />
+                  </Button>
                 </div>
 
-                {/* Main middle content */}
-                <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto px-4">
+                {/* Main Content Area */}
+                <div className="w-full flex-1 flex flex-col justify-center items-center overflow-y-auto px-4 sm:px-6 pb-4">
                   <AlertMessage
                     message={msg.message}
                     show={msg.show}
                     onClose={() => setMsg({ message: "", show: false })}
                   />
 
-                  <div className="aspect-square max-w-[350px] w-full rounded-2xl overflow-hidden mb-6">
+                  {/* Album Art */}
+                  <div className="w-full max-w-[280px] sm:max-w-[320px] md:max-[350px] aspect-square rounded-2xl overflow-hidden mb-6 sm:mb-8 shadow-2xl">
                     <img
                       src={
                         src
                           ? src
-                          : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                          : `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
                       }
                       onError={(e) => {
                         e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
@@ -588,29 +593,46 @@ const MusicPlayer = () => {
                     />
                   </div>
 
-                  <Slider
-                    value={[currentTime]}
-                    max={duration || 100}
-                    step={1}
-                    min={0}
-                    onValueChange={(v) => {
-                      setIsPlaying(false);
-                      handleSeek(v[0]);
-                    }}
-                    onValueCommit={(v) => {
-                      if (!player || !isReady) return;
-                      const wasPlaying = isPlaying;
-                      player.seekTo(v[0], true);
-                      setCurrentTime(v[0]);
-                      if (wasPlaying) player.playVideo();
-                    }}
-                  />
-                  <div className="flex justify-between w-full text-xs text-slate-400 mt-2">
+                  {/* Song Info */}
+                  <div className="w-full max-w-4xl  text-center mb-6">
+                    <h2 className="text-white text-lg sm:text-xl md:text-2xl font-bold leading-tight mb-2">
+                      {title}
+                    </h2>
+                    <p className="text-slate-400 text-sm sm:text-base">
+                      {artist}
+                    </p>
+                  </div>
+
+                  {/* Progress Slider */}
+                  <div className="w-full max-w-4xl mb-2">
+                    <Slider
+                      value={[currentTime]}
+                      max={duration || 100}
+                      step={1}
+                      min={0}
+                      onValueChange={(v) => {
+                        setIsPlaying(false);
+                        handleSeek(v[0]);
+                      }}
+                      onValueCommit={(v) => {
+                        if (!player || !isReady) return;
+                        const wasPlaying = isPlaying;
+                        player.seekTo(v[0], true);
+                        setCurrentTime(v[0]);
+                        if (wasPlaying) player.playVideo();
+                      }}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Time Display */}
+                  <div className="flex justify-between w-full max-w-4xl text-xs sm:text-sm text-slate-400 mb-6 sm:mb-8">
                     <span>{formatTime(currentTime)}</span>
                     <span>{formatTime(duration)}</span>
                   </div>
 
-                  <div className="flex justify-center gap-4 mt-6">
+                  {/* Main Control Buttons */}
+                  <div className="flex justify-center items-center gap-3 sm:gap-4 md:gap-6 mb-8">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -618,30 +640,41 @@ const MusicPlayer = () => {
                         !["history", "favorite", "playlist"].includes(from)
                       }
                       onClick={handlePrevious}
+                      className="h-10 w-10 sm:h-12 sm:w-12 text-slate-400 hover:text-white disabled:opacity-30"
                     >
-                      <SkipBack />
+                      <SkipBack className="h-5 w-5 sm:h-6 sm:w-6" />
                     </Button>
+
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleSeek(currentTime - 10)}
+                      className="h-10 w-10 sm:h-12 sm:w-12 text-slate-400 hover:text-white"
                     >
-                      <Rewind />
+                      <Rewind className="h-5 w-5 sm:h-6 sm:w-6" />
                     </Button>
+
                     <Button
                       onClick={handlePlayPause}
                       disabled={!isReady}
-                      className="h-12 w-12 rounded-full bg-white text-black"
+                      className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-white text-black hover:bg-slate-100 disabled:opacity-50 shadow-lg"
                     >
-                      {isPlaying ? <Pause /> : <Play className="ml-1" />}
+                      {isPlaying ? (
+                        <Pause className="h-6 w-6 sm:h-7 sm:w-7" />
+                      ) : (
+                        <Play className="h-6 w-6 sm:h-7 sm:w-7 ml-1" />
+                      )}
                     </Button>
+
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleSeek(currentTime + 10)}
+                      className="h-10 w-10 sm:h-12 sm:w-12 text-slate-400 hover:text-white"
                     >
-                      <FastForward />
+                      <FastForward className="h-5 w-5 sm:h-6 sm:w-6" />
                     </Button>
+
                     <Button
                       variant="ghost"
                       size="icon"
@@ -649,64 +682,81 @@ const MusicPlayer = () => {
                         !["history", "favorite", "playlist"].includes(from)
                       }
                       onClick={handleNext}
+                      className="h-10 w-10 sm:h-12 sm:w-12 text-slate-400 hover:text-white disabled:opacity-30"
                     >
-                      <SkipForward />
+                      <SkipForward className="h-5 w-5 sm:h-6 sm:w-6" />
                     </Button>
                   </div>
                 </div>
 
-                {/* End buttons pinned at bottom */}
-                <div className="shrink-0 px-4 pb-[env(safe-area-inset-bottom)]">
-                  <div className="flex justify-between text-xs text-slate-400 pt-2">
-                    {/* like */}
+                {/* Bottom Controls */}
+                <div className="shrink-0 px-4 sm:px-6 py-4 bg-slate-900 border-t border-slate-700/30">
+                  <div className="flex justify-between items-center max-w-5xl mx-auto">
+                    {/* Like Button */}
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleLikeClick}
-                      className={added ? "text-red-400" : ""}
+                      className={`flex flex-col items-center gap-1 px-2 py-2 min-w-[60px] ${
+                        added
+                          ? "text-red-400"
+                          : "text-slate-400 hover:text-white "
+                      }`}
                     >
                       <Heart
                         className={`h-4 w-4 ${
                           added ? "fill-current scale-110" : ""
                         }`}
                       />
-                      <span>Like</span>
+                      <span className="text-xs">Like</span>
                     </Button>
-                    {/* shuffle */}
+
+                    {/* Shuffle Button */}
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={shuffleClick}
-                      className={isShuffleOn ? "text-blue-400" : ""}
+                      className={`flex flex-col items-center gap-1 px-2 py-2 min-w-[60px] ${
+                        isShuffleOn
+                          ? "text-blue-400"
+                          : "text-slate-400 hover:text-white"
+                      }`}
                     >
                       <Shuffle className="h-4 w-4" />
-                      <span>Shuffle</span>
+                      <span className="text-xs">Shuffle</span>
                     </Button>
-                    {/* loop */}
+
+                    {/* Repeat Button */}
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={repeatClick}
-                      className={isRepeatOn ? "text-blue-400" : ""}
+                      className={`flex flex-col items-center gap-1 px-2 py-2 min-w-[60px] ${
+                        isRepeatOn
+                          ? "text-blue-400"
+                          : "text-slate-400 hover:text-white"
+                      }`}
                     >
                       <Repeat className="h-4 w-4" />
-                      <span>Repeat</span>
+                      <span className="text-xs">Repeat</span>
                     </Button>
-                    {/* menu dots */}
+
+                    {/* More Options Dropdown */}
                     <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          size="icon"
-                          className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md"
+                          size="sm"
+                          className="flex flex-col items-center gap-1 px-2 py-2 min-w-[60px] rounded-lg bg-white/10 hover:bg-white/20"
                         >
-                          <MoreHorizontalIcon className="h-5 w-5 text-white" />
+                          <MoreHorizontalIcon className="h-4 w-4 text-white" />
+                          <span className="text-xs text-white">More</span>
                         </Button>
                       </DropdownMenuTrigger>
 
                       <DropdownMenuPortal>
-                        <DropdownMenuContent className="z-[999999] w-48 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 text-white shadow-xl">
-                          {/* Mute option */}
+                        <DropdownMenuContent className="z-[999999] w-48 rounded-2xl bg-black/80 backdrop-blur-md border border-white/20 text-white shadow-xl mb-4">
+                          {/* Mute/Unmute */}
                           <DropdownMenuItem
                             onSelect={(e) => {
                               e.preventDefault();
@@ -719,21 +769,22 @@ const MusicPlayer = () => {
                                 alertCall("Audio unmuted", true);
                               }
                             }}
-                            className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-white/10 rounded-xl"
+                            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/10 rounded-xl"
                           >
                             {!mute ? (
                               <VolumeOff className="h-4 w-4 text-red-400" />
                             ) : (
-                              <Volume2Icon className="h-4 w-4 text-red-400" />
+                              <Volume2Icon className="h-4 w-4 text-green-400" />
                             )}
-                            <span>{!mute ? "Unmute" : "Mute"}</span>
+                            <span>{!mute ? "Mute" : "Unmute"}</span>
                           </DropdownMenuItem>
 
-                          <DropdownMenuSeparator className="bg-white/20" />
+                          <DropdownMenuSeparator className="bg-white/20 my-1" />
 
+                          {/* AutoPlay Toggle */}
                           <DropdownMenuItem
-                            onSelect={(e) => e.preventDefault()} // ✅ stops dropdown from closing
-                            className="flex items-center justify-between px-3 py-2 rounded-xl focus:bg-white/10"
+                            onSelect={(e) => e.preventDefault()}
+                            className="flex items-center justify-between px-4 py-3 rounded-xl focus:bg-white/10"
                           >
                             <span>AutoPlay</span>
                             <Switch
@@ -743,8 +794,8 @@ const MusicPlayer = () => {
                                 setIsAutoplayOn(checked);
                                 alertCall(
                                   !isAutoplayOn
-                                    ? "AutoPlay mode On"
-                                    : "AutoPlay mode Off",
+                                    ? "AutoPlay On"
+                                    : "AutoPlay Off",
                                   true
                                 );
                                 if (checked) {
@@ -752,21 +803,26 @@ const MusicPlayer = () => {
                                   setIsRepeatOn(false);
                                 }
                               }}
-                              className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-600"
+                              className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-600 h-5 w-9"
                             />
                           </DropdownMenuItem>
 
-                          <DropdownMenuItem onSelect={(e) => setOpen(true)}>
-                            <span className="flex items-center gap-2">
-                              <MoreHorizontalIcon className="h-5 w-5 text-white" />
-                              Your Playlist
-                            </span>
+                          <DropdownMenuSeparator className="bg-white/20 my-1" />
+
+                          {/* Playlist */}
+                          <DropdownMenuItem
+                            onSelect={(e) => setOpen(true)}
+                            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/10 rounded-xl"
+                          >
+                            <MoreHorizontalIcon className="h-4 w-4 text-white" />
+                            <span>Your Playlist</span>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenuPortal>
                     </DropdownMenu>
                   </div>
 
+                  {/* Playlist Sidebar */}
                   <SideBarContent
                     playlistName={from}
                     from={from}

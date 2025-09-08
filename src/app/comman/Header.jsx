@@ -76,10 +76,10 @@ export const Header = () => {
   return (
     <header
       className={`sticky  flex items-center justify-between px-6  
-  rounded-2xl border border-white/20 z-[50]
+   border  z-[50]
   bg-gradient-to-r from-gray-800/20 via-gray-500/10 to-gray-800/20 
   backdrop-blur-md shadow-lg duration-300 max-w-[100%] mx-auto ${
-    scrolled ? "bg-gray-800/50 py-2 w-[95%] my-2 top-2" : "py-3 w-[100%] top-0"
+    scrolled ? "bg-gray-800/50 py-2 w-[95%] my-2 top-2 rounded-2xl border-white/20" : "py-3 w-[100%] top-1 md:top-0 "
   }`}
     >
       {/* Left: Logo */}
@@ -203,7 +203,7 @@ export function MobileMenu() {
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className={`bg-blue-500 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-0 border  text-white p-6 z-[100000] h-[90vh] `}
+        className={`bg-blue-500 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-0 border  text-white p-6 z-[100000] h-[80vh] `}
       >
         <SheetHeader className={"invisible opacity-0 w-0 h-0 overflow-hidden"}>
           <SheetTitle>Mobile Menu</SheetTitle>
