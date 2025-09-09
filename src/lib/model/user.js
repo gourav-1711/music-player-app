@@ -18,6 +18,6 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-const user = mongoose.models.User || mongoose.model("Music-Users", UserSchema);
+const user = mongoose.models.Music_Users || mongoose.model("Music_Users", UserSchema);
 
 export default user;
