@@ -311,21 +311,14 @@ const MusicPlayer = () => {
   const musicObj = {};
 
   const handleLikeClick = () => {
-    if (mode === "search") {
-      musicObj.id = videoId;
-      musicObj.title = title;
-      musicObj.artist = artist;
-      musicObj.description = description;
-      musicObj.src =
-        `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` ||
-        `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-    } else {
-      musicObj.id = videoId;
-      musicObj.title = title;
-      musicObj.artist = artist;
-      musicObj.description = description;
-      musicObj.src = src;
-    }
+    musicObj.id = videoId;
+    musicObj.title = title;
+    musicObj.artist = artist;
+    musicObj.description = description;
+    musicObj.src =
+      `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` ||
+      `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    console.log(musicObj);
 
     if (added) {
       dispatch(removeFavorite(musicObj));
